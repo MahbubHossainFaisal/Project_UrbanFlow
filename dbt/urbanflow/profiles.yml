@@ -1,0 +1,13 @@
+urbanflow:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "ws37517.ap-southeast-7.aws"
+      user: "URBANFLOW_USER"
+      password: "StrongPassword123!"
+      role: "MAHBUB_DE_ROLE"
+      warehouse: "COMPUTE_WH"
+      database: "URBANFLOW_DB"
+      schema: "BRONZE"
+      threads: 1
