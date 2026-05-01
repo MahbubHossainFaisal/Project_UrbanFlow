@@ -18,7 +18,7 @@ SNOWFLAKE_USER = os.getenv("SNOWFLAKE_USER")
 SNOWFLAKE_ACCOUNT = os.getenv("SNOWFLAKE_ACCOUNT")
 SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
 SNOWFLAKE_WAREHOUSE = os.getenv("SNOWFLAKE_WAREHOUSE")
-SNOWFLAKE_DATABASE = os.getenv("SNOWFLAKE_DATABASE") or "URBANFLOW_DB"  # Use URBANFLOW_DB as default
+SNOWFLAKE_DATABASE = os.getenv("SNOWFLAKE_DATABASE")
 SNOWFLAKE_SCHEMA = os.getenv("SNOWFLAKE_SCHEMA")
 SNOWFLAKE_ROLE = os.getenv("SNOWFLAKE_ROLE")
 # setup logging
@@ -115,11 +115,6 @@ def main():
         logger.info("Snowflake connection established!")
         
         logger.info(f"Setting session context... DB: {SNOWFLAKE_DATABASE}, SCHEMA: {SNOWFLAKE_SCHEMA}")
-        cur = conn.cursor()
-        cur.execute(f"USE WAREHOUSE {SNOWFLAKE_WAREHOUSE}")
-        cur.execute(f"USE DATABASE {SNOWFLAKE_DATABASE}")
-        cur.execute(f"USE SCHEMA {SNOWFLAKE_SCHEMA}")
-        cur.close()
 
         # Read parquet file
         logger.info(f"Reading {file_path}...")
@@ -158,10 +153,8 @@ def main():
         logger.info(f"All batches loaded successfully to {SNOWFLAKE_DATABASE}.{SNOWFLAKE_SCHEMA}.RAW_TAXI_TRIPS. Total rows: {total_rows}")
         load_success = True
     except Exception as e:
-        logger.error(f"Snowflake operation failed: {e}")
-        import traceback
-        logger.error(traceback.format_exc())
-        sys.exit(1)
+        logger.exception(f"Snowflake operation failed!")
+        load_success=False
 
 
     finally:
@@ -170,7 +163,6 @@ def main():
             logger.info("Snowflake connection closed.")
         if load_success:
             logger.info(f"Ingestion completed successfully for {filename}.")
-            sys.exit(0)
         else:
             logger.error(f"Ingestion failed for {filename}.")
             sys.exit(1)

@@ -9,9 +9,7 @@ import snowflake.connector as sf
 from snowflake.connector.pandas_tools import write_pandas
 from dotenv import load_dotenv
 import logging
-import time
 import sys
-import json
 
 # 2. Get API key and dates from ENV/CLI
 load_dotenv()
@@ -32,32 +30,14 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# 3. Request data from open-meteo api with retries
 
-def fetch_weather_data(start_date, end_date):
-    url = "https://archive-api.open-meteo.com/v1/archive"
-    params = {
-        "latitude": 40.7128,
-        "longitude": -74.0060,
-        "start_date": start_date,
-        "end_date": end_date,
-        "hourly": "temperature_2m,precipitation,snowfall,windspeed_10m,weathercode",
-        "timezone": "America/New_York"
-    }
-
-    with requests.get(url,params=params) as response:
-        response.raise_for_status()
-        return response.json()
-    
-# 5. Convert API JSON response to Pandas Dataframe
-def process_weather_data(json_data,source_url):
-    hourly_data = json_data.get('hourly')
-    if not hourly_data:
-        logger.error("No 'hourly' data found in the API")
-        return pd.DataFrame()
+# 5. Convert API response to Pandas Dataframe
+def process_zone_lookup_data(source_url):
 
 
-    df = pd.DataFrame(hourly_data)
+    df = pd.read_csv(source_url)
+    if df.empty:
+        return df
 
     #Audit columns
     df['SOURCE_URL'] = source_url
@@ -65,6 +45,7 @@ def process_weather_data(json_data,source_url):
     #Standardize column names that should be matched to Snowflake table.
     df.rename(columns=str.upper, inplace=True)
     return df
+
 # 4. connect to Snowflake (BRONZE SCHEMA)
 def load_to_Snowflake(df):
     if df.empty:
@@ -84,19 +65,19 @@ def load_to_Snowflake(df):
             role=SNOWFLAKE_ROLE
         )
 
-        logger.info(f"Loading {len(df)} rows into RAW_WEATHER_HOURLY Table...")
+        logger.info(f"Loading {len(df)} rows into RAW_ZONE_LOOKUP Table...")
         
         success, nchunks, nrows, _ = write_pandas(
             conn,
             df,
-            table_name="RAW_WEATHER_HOURLY",
+            table_name="RAW_TAXI_ZONE_LOOKUP",
             auto_create_table=True,
-            overwrite=False
+            overwrite=True
         )
         if success:
             logger.info(f"Successfully loaded {nrows} rows")
     except Exception as e:
-        logger.error(f"Snowflake data load failed: {e}")
+        logger.exception(f"Snowflake data load failed")
         raise
 
     finally:
@@ -105,28 +86,20 @@ def load_to_Snowflake(df):
             logger.info("Snowflake connection closed")
 
 
-
 if __name__ == "__main__":
-
-    test_start = "2023-01-01"
-    test_end = "2023-02-28"
-
+    
     try:
-        # 1. Fetch data
-        raw_json = fetch_weather_data(test_start,test_end)
-        source_url = "https://archive-api.open-meteo.com/v1/archive"
-        logger.info("Successfully fetched data!")
+        # 1. Fetch and Process data
+        source_url = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
 
-        # 2. Process data
-
-        weather_df = process_weather_data(raw_json,source_url)
+        zone_lookup_df = process_zone_lookup_data(source_url)
 
         # 3. Verify locally
-        logger.info(f"DataFrame Shape: {weather_df.shape}")
-        logger.info(f"Columns: {weather_df.columns.tolist()}")
+        logger.info(f"DataFrame Shape: {zone_lookup_df.shape}")
+        logger.info(f"Columns: {zone_lookup_df.columns.tolist()}")
 
         # 4. Load
-        load_to_Snowflake(weather_df)
+        load_to_Snowflake(zone_lookup_df)
 
     except Exception as e:
         logger.error(f"Ingestion pipeline failed!: {e}")

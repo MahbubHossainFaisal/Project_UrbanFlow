@@ -26,13 +26,14 @@ The project follows the industry-standard **Medallion Architecture**, ensuring d
 
 ## 🚀 Project Progress
 
-### Phase 1: Bronze Layer (Ingestion) - 🔄 In Progress (~90%)
-- [x] **NYC Taxi Data**: Ingested Jan/Feb 2023 Parquet files (~5.9M rows).
-- [🟡] **Weather Data**: API connection verified. Ingestion script (`ingest_weather.py`) in development.
-- [ ] **Zone Lookup**: Pending ingestion of static CSV.
+### Phase 1: Bronze Layer (Ingestion) - ✅ 100% Complete
+- [x] **NYC Taxi Data**: Ingested Jan/Feb 2023 Parquet files (~6M rows) using chunked/batch processing.
+- [x] **Weather Data**: Automated ingestion of hourly historical data from Open-Meteo API.
+- [x] **Zone Lookup**: Ingested static NYC TLC geography reference data.
+- [x] **Auditability**: All Bronze tables include `SOURCE_URL` and `LOADED_AT` audit columns.
 
-### Phase 2: Silver Layer (Transformation) - ❌ Not Started
-- [ ] dbt Source Declarations
+### Phase 2: Silver Layer (Transformation) - 🔄 In Progress
+- [ ] dbt Source Declarations (`sources.yml`)
 - [ ] Data Cleaning & Deduplication
 - [ ] Schema Validation & dbt Tests
 
