@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: bronze 
+    database: URBANFLOW_DB
+    schema: BRONZE
+    tables:
+      - name: raw_taxi_trips
+        description: "Raw NYC Yellow Taxi trip records ingested from Parquet files."
+      - name: raw_weather_hourly
+        description: "Hourly historical weather data for NYC from Open-Meteo API."
+      - name: raw_zone_lookup
+        description: "Static CSV mapping LocationIDs to NYC Boroughs and Zones."
