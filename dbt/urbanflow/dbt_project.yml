@@ -29,5 +29,14 @@ clean-targets:         # directories to be removed by `dbt clean`
 # In this example config, we tell dbt to build all models in the example/
 # directory as views. These settings can be overridden in the individual model
 # files using the `{{ config(...) }}` macro.
-# models:
-#   urbanflow:
+models:
+  urbanflow:
+    +schema: public # Default
+
+    silver: 
+      # Everything under models/silver will now have a custom schema named silver
+      +schema: silver
+    
+    gold:
+      # Everything under models/gold will have a custom schema named gold
+      +schema: gold

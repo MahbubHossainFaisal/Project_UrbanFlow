@@ -1,0 +1,21 @@
+- What has been done on ingestion_taxi.py?
+- The process of adding an ingestion layer with batch processing
+- steps
+    - 1. load env
+    - 2. setup logging
+    - 3. Setup a function that initializes request URL and request and download files in batches.
+        - Add how the script input would be using argparse.
+        - Add retry logic while downloading
+        - Proper loggings
+        - with proper try catch error handlings
+        - adding pyarrow lib to read parquet format as it reads parquet files faster than pandas
+        - file download done
+    - 4. Process the data using Pandas function
+        - Create a connection with Snowflake
+        - reading downloaded files using pyarrow and then converting batches to pandas dataframe
+        - Map the columns
+        - Add audit columns
+        - (Table would be created on snowflake side as well)
+        - Ingest the data in batches.
+        - Close the connection.
+        

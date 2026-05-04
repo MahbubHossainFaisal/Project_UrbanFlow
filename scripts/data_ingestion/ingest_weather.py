@@ -1,5 +1,4 @@
 # 1. Imports and Logging setup
-import argparse
 import requests
 import os
 import pandas as pd
@@ -9,10 +8,7 @@ import snowflake.connector as sf
 from snowflake.connector.pandas_tools import write_pandas
 from dotenv import load_dotenv
 import logging
-import time
 import sys
-import json
-
 # 2. Get API key and dates from ENV/CLI
 load_dotenv()
 
