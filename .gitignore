@@ -1,6 +1,7 @@
 # Credentials & Secrets
 .env
 passwords/
+session_docs/
 .passwords/
 **/profiles.yml
 
