@@ -56,3 +56,19 @@ We defined "Dirty Data" as records that represent physical impossibilities or sy
 
 ### 🎓 The Architect's Takeaway
 The Silver layer's primary goal is **Trust**. By the time the data leaves this model, every row must represent a valid, unique, and physically possible trip. We have successfully converted "Chaos Data" into "Trustworthy Assets."
+
+---
+
+### 🚀 Command Breakdown: Executing the Model
+To materialize this logic into Snowflake, we used a specific dbt command. Here is the architectural breakdown:
+
+**Command**: `uv run dbt run --select stg_taxi_trips --full-refresh`
+
+1.  **`uv run`**: Ensures dbt runs inside our project's specific virtual environment with the correct dependencies installed.
+2.  **`dbt run`**: The core dbt command that compiles your SQL and executes the `CREATE` or `INSERT` statements in Snowflake.
+3.  **`--select stg_taxi_trips`**: Tells dbt to only run this specific model. In production, you rarely want to run the "whole world" if you are only fixing one table. This saves time and compute cost.
+4.  **`--full-refresh`**: 
+    - **Normal Run**: dbt would only look for "New" rows (incremental logic).
+    - **Full Refresh**: dbt drops the existing table and rebuilds it from scratch. 
+    - **When to use**: Use this when you change your logic (like our microsecond fix) or when you need to "Reset" the data due to a quality issue.
+

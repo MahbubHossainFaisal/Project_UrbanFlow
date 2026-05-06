@@ -30,12 +30,18 @@ The project follows the industry-standard **Medallion Architecture**, ensuring d
 - [x] **NYC Taxi Data**: Ingested Jan/Feb 2023 Parquet files (~6M rows) using chunked/batch processing.
 - [x] **Weather Data**: Automated ingestion of hourly historical data from Open-Meteo API.
 - [x] **Zone Lookup**: Ingested static NYC TLC geography reference data.
-- [x] **Auditability**: All Bronze tables include `SOURCE_URL` and `LOADED_AT` audit columns.
+- [x] **Auditability**: All Bronze tables include `SOURCE_FILE` and `LOADED_AT` audit columns.
 
 ### Phase 2: Silver Layer (Transformation) - 🔄 In Progress
-- [ ] dbt Source Declarations (`sources.yml`)
-- [ ] Data Cleaning & Deduplication
-- [ ] Schema Validation & dbt Tests
+- [x] **dbt Source Declarations**: Defined in `models/sources.yml`.
+- [x] **Schema Routing**: Implemented `generate_schema_name` macro for professional Medallion schema organization.
+- [x] **Taxi Staging Model**: `stg_taxi_trips.sql` implemented with:
+    - [x] Microsecond precision timestamp correction.
+    - [x] MD5 Surrogate Key generation.
+    - [x] Deduplication (keeping the latest `LOADED_AT` version).
+    - [x] Business rule filtering (5.4M clean rows).
+- [ ] **Weather Staging Model**: (Next Task)
+- [ ] **Data Quality Layer**: `schema.yml` validation tests.
 
 ### Phase 3: Gold Layer (Analytics) - ❌ Not Started
 - [ ] Weather & Taxi Join logic
@@ -46,22 +52,18 @@ The project follows the industry-standard **Medallion Architecture**, ensuring d
 
 ## ⚙️ Project Setup & Commands Used
 
-Below is a list of the unique commands that have been used to initialize and set up this project.
-
 ### 1. Python Environment Setup (using `uv`)
+We use [`uv`](https://github.com/astral-sh/uv) to manage our Python virtual environment and dependencies for speed and efficiency.
+*   `uv venv --python 3.12` - Creates an isolated environment.
+*   `uv add requirements.txt` - Installs dependencies.
 
-We use [`uv`](https://github.com/astral-sh/uv) to manage our Python virtual environment and dependencies because of its speed.
+### 2. dbt Execution
+Commands are executed from the `dbt/urbanflow` directory:
+*   `uv run dbt run --select stg_taxi_trips` - Materializes the Silver Taxi model.
+*   `uv run dbt run --select stg_taxi_trips --full-refresh` - Rebuilds the model from scratch (bypassing incremental logic).
+*   `uv run dbt list --select silver` - Verifies dbt configuration and model visibility.
 
-*   `uv venv --python 3.12` - Creates an isolated Python virtual environment.
-*   `.venv\Scripts\activate` - Activates the virtual environment.
-*   `uv add requirements.txt` - Installs project dependencies.
-
-### 2. dbt (Data Build Tool) Initialization
-
-*   `dbt init urbanflow` - Initializes the dbt project structure.
-
-### 3. Custom dbt Wrapper (Environment Variable Management)
-
-We use a custom PowerShell script (`run_dbt.ps1`) to inject `.env` variables before running dbt.
-
-*   `dbt debug` - Verifies the Snowflake connection (via the wrapper).
+### 📚 Learning Resources
+Detailed architectural deep-dives and "Elite Engineering" patterns are documented in the following repository:
+*   [`Learnings/dbt/basic_config_FAQs.md`](Learnings/dbt/basic_config_FAQs.md) - dbt configuration intuition.
+*   [`Learnings/dbt/02_Silver_Stage_Taxi_Trips.md`](Learnings/dbt/02_Silver_Stage_Taxi_Trips.md) - Silver layer design patterns.
