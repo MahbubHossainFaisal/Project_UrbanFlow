@@ -32,7 +32,7 @@ The project follows the industry-standard **Medallion Architecture**, ensuring d
 - [x] **Zone Lookup**: Ingested static NYC TLC geography reference data.
 - [x] **Auditability**: All Bronze tables include `SOURCE_FILE` and `LOADED_AT` audit columns.
 
-### Phase 2: Silver Layer (Transformation) - 🔄 In Progress
+### Phase 2: Silver Layer (Transformation) - ✅ 100% Complete
 - [x] **dbt Source Declarations**: Defined in `models/sources.yml`.
 - [x] **Schema Routing**: Implemented `generate_schema_name` macro for professional Medallion schema organization.
 - [x] **Taxi Staging Model**: `stg_taxi_trips.sql` implemented with:
@@ -44,10 +44,12 @@ The project follows the industry-standard **Medallion Architecture**, ensuring d
     - [x] Custom `classify_weather` dbt macro for WMO code mapping.
     - [x] View materialization strategy for cost-efficiency.
     - [x] Feature engineering (`is_precipitation` flag).
-- [ ] **Zone Lookup Staging**: (Next Task)
-- [ ] **Data Quality Layer**: `schema.yml` validation tests.
+- [x] **Zone Lookup Staging**: `stg_zone_lookup.sql` implemented with:
+    - [x] Defensive `COALESCE` handling for IDs 264 & 265 ("Unknown" zones).
+    - [x] Table materialization for optimal join performance.
+- [x] **Data Quality Layer**: `schema.yml` validation with `unique` and `not_null` guardrails across all Silver models.
 
-### Phase 3: Gold Layer (Analytics) - ❌ Not Started
+### Phase 3: Gold Layer (Analytics) - 🔄 In Progress
 - [ ] Weather & Taxi Join logic
 - [ ] Aggregated Demand Analytics
 - [ ] Data Lineage & Documentation
@@ -63,8 +65,8 @@ We use [`uv`](https://github.com/astral-sh/uv) to manage our Python virtual envi
 
 ### 2. dbt Execution
 Commands are executed from the `dbt/urbanflow` directory:
-*   `uv run dbt run --select stg_taxi_trips` - Materializes the Silver Taxi model.
-*   `uv run dbt run --select stg_weather_hourly` - Materializes the Silver Weather model as a view.
+*   `uv run dbt run --select silver` - Materializes all Silver models.
+*   `uv run dbt test --select silver` - Executes all Data Quality guardrails for the Silver layer.
 *   `uv run dbt list --select silver` - Verifies dbt configuration and model visibility.
 
 ### 📚 Learning Resources
@@ -72,3 +74,4 @@ Detailed architectural deep-dives and "Elite Engineering" patterns are documente
 *   [`Learnings/dbt/01_basic_config_FAQs.md`](Learnings/dbt/01_basic_config_FAQs.md) - dbt configuration intuition.
 *   [`Learnings/dbt/02_Silver_Stage_Taxi_Trips.md`](Learnings/dbt/02_Silver_Stage_Taxi_Trips.md) - Silver layer design patterns for event data.
 *   [`Learnings/dbt/03_Silver_Stage_Weather_Hourly.md`](Learnings/dbt/03_Silver_Stage_Weather_Hourly.md) - Silver layer design patterns for time-series data.
+*   [`Learnings/dbt/04_Silver_Stage_Lookup_zone.md`](Learnings/dbt/04_Silver_Stage_Lookup_zone.md) - Defensive engineering for reference data.
