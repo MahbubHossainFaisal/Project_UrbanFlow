@@ -8,9 +8,55 @@ By combining millions of taxi trip records with historical weather data, we aim 
 - What are the highest weather-correlated demand shifts?
 - How do fares and trip durations change under different weather conditions?
 
-## 🏗️ Architecture (Medallion)
-The project follows the industry-standard **Medallion Architecture**, ensuring data quality and reproducibility at every step:
+## 🏗️ Architecture & Workflow
+The project follows the industry-standard **Medallion Architecture**, ensuring data quality and reproducibility at every step.
 
+### 🗺️ End-to-End System Workflow
+```mermaid
+graph TD
+    subgraph "1. DATA INGESTION (Python + Airflow)"
+        A[External Sources] -->|S3 Parquet| B(ingest_taxi.py)
+        A -->|API JSON| C(ingest_weather.py)
+        A -->|Static CSV| D(ingest_zone_lookup.py)
+    end
+
+    subgraph "2. BRONZE LAYER (Raw Data)"
+        B -->|Bulk Load| E[(RAW_TAXI_TRIPS)]
+        C -->|Bulk Load| F[(RAW_WEATHER_HOURLY)]
+        D -->|Bulk Load| G[(RAW_ZONE_LOOKUP)]
+    end
+
+    subgraph "3. SILVER LAYER (dbt Staging)"
+        E --> S1[stg_taxi_trips]
+        F --> S2[stg_weather_hourly]
+        G --> S3[stg_zone_lookup]
+        
+        S1 & S2 & S3 --> Q{DQ GUARDRAILS}
+        Q -->|Pass| S1_C[Cleaned Taxi]
+        Q -->|Pass| S2_C[Cleaned Weather]
+        Q -->|Pass| S3_C[Cleaned Zones]
+        Q -.->|Fail| Error[Pipeline Stop]
+    end
+
+    subgraph "4. GOLD LAYER (Analytics)"
+        S1_C & S2_C & S3_C --> G1[gold_fact_trips]
+        G1 --> G2[gold_agg_demand_weather]
+    end
+
+    subgraph "5. ORCHESTRATION"
+        Airflow((Apache Airflow))
+        Airflow -.->|Trigger| B
+        Airflow -.->|Trigger| C
+        Airflow -.->|Trigger| S1
+        Airflow -.->|Trigger| G1
+    end
+
+    style Airflow fill:#00d2ff,stroke:#333,stroke-width:2px
+    style Error fill:#ff4b2b,stroke:#333
+    style Q fill:#f9d423,stroke:#333
+```
+
+### 🔄 The Medallion Logic
 1.  **Bronze (Raw)**: Ingesting raw data from source systems (S3, Open-Meteo API) as-is.
 2.  **Silver (Cleaned)**: Cleaning, validating, and standardizing data using **dbt**.
 3.  **Gold (Curated)**: Creating analytics-ready facts and dimensions for business reporting.
