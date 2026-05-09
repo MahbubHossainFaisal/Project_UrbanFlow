@@ -62,7 +62,6 @@ def main():
     # Define the URL and File
     filename = f"yellow_tripdata_{args.year}-{args.month}.parquet"
     url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{args.year}-{args.month}.parquet"
-    
 
     # define a data directory
     data_dir = "data/raw"

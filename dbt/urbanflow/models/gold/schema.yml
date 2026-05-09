@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: gold_agg_demand_weather
+    description: "Daily/Hourly aggregation of taxi demand and weather conditions by borough"
+    columns:
+      - name: agg_id
+        description: "Surrogate key (MD5 Hash) of hour, borough and weather category"
+        tests:
+          - unique
+          - not_null
+      - name: total_trips
+        description: "Total number of trips for this slice"
+        tests:
+          - not_null
+  - name: gold_fact_trips
+    description: "The core fact table joining taxi trips, hourly weather, and zone lookups."
+    columns:
+      - name: trip_id
+        description: "Primary key for each unique taxi trip."
+        tests:
+          - unique
+          - not_null

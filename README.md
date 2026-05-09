@@ -95,10 +95,16 @@ graph TD
     - [x] Table materialization for optimal join performance.
 - [x] **Data Quality Layer**: `schema.yml` validation with `unique` and `not_null` guardrails across all Silver models.
 
-### Phase 3: Gold Layer (Analytics) - 🔄 In Progress
-- [ ] Weather & Taxi Join logic
-- [ ] Aggregated Demand Analytics
-- [ ] Data Lineage & Documentation
+### Phase 3: Gold Layer (Analytics) - ✅ 100% Complete
+- [x] **The Single Source of Truth**: `gold_fact_trips.sql` unifies 5.4M taxi trips with hourly weather and zones.
+- [x] **Demand Aggregation**: `gold_agg_demand_weather.sql` provides pre-calculated insights (730x data compression).
+- [x] **Business Intelligence**: Validated weather-demand correlations (Rain spikes demand; Snow crashes it).
+- [x] **Data Trust**: Implemented `schema.yml` guardrails for the entire Gold layer.
+
+### Phase 4: Orchestration (Airflow & Docker) - 🔄 In Progress
+- [ ] Dockerizing the environment
+- [ ] Airflow DAG development
+- [ ] End-to-end pipeline automation
 
 ---
 
@@ -113,7 +119,8 @@ We use [`uv`](https://github.com/astral-sh/uv) to manage our Python virtual envi
 Commands are executed from the `dbt/urbanflow` directory:
 *   `uv run dbt run --select silver` - Materializes all Silver models.
 *   `uv run dbt test --select silver` - Executes all Data Quality guardrails for the Silver layer.
-*   `uv run dbt list --select silver` - Verifies dbt configuration and model visibility.
+*   `uv run dbt run --select gold` - Materializes the analytics layer.
+*   `uv run dbt test --select gold` - Verifies the integrity of the Gold layer.
 
 ### 📚 Learning Resources
 Detailed architectural deep-dives and "Elite Engineering" patterns are documented in the following repository:
@@ -121,3 +128,5 @@ Detailed architectural deep-dives and "Elite Engineering" patterns are documente
 *   [`Learnings/dbt/02_Silver_Stage_Taxi_Trips.md`](Learnings/dbt/02_Silver_Stage_Taxi_Trips.md) - Silver layer design patterns for event data.
 *   [`Learnings/dbt/03_Silver_Stage_Weather_Hourly.md`](Learnings/dbt/03_Silver_Stage_Weather_Hourly.md) - Silver layer design patterns for time-series data.
 *   [`Learnings/dbt/04_Silver_Stage_Lookup_zone.md`](Learnings/dbt/04_Silver_Stage_Lookup_zone.md) - Defensive engineering for reference data.
+*   [`Learnings/dbt/05_Gold_Stage.md`](Learnings/dbt/05_Gold_Stage.md) - Gold layer architecture and analytics insights.
+

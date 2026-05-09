@@ -6,13 +6,6 @@
     )
 }}
 
-/*
-   GUIDED TRANSFORMATION: STG_TAXI_TRIPS
-   
-   Your journey to a clean Silver table begins here. 
-   Follow the CTE structure below to transform raw data into analytics-ready rows.
-*/
-
 WITH source AS (
     SELECT * FROM {{ source('bronze', 'raw_taxi_trips') }}
 ),
