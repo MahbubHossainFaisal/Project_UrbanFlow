@@ -1,132 +1,104 @@
-# UrbanFlow Analytics: NYC Taxi & Weather Platform
+# UrbanFlow Analytics: Full-Stack Urban Intelligence Platform
 
 ## 🏙️ Project Overview
-This project is an end-to-end data engineering pipeline built for **UrbanFlow Analytics**. The goal is to help the **NYC Taxi & Limousine Commission (TLC)** understand how weather conditions (rain, snow, temperature) affect taxi demand patterns across New York City boroughs.
+UrbanFlow Analytics is an end-to-end, production-grade data intelligence platform built for the **NYC Taxi & Limousine Commission (TLC)**. Moving beyond simple orchestration, this platform is a **Full-Stack Data Factory** designed to provide deep insights into urban mobility, financial integrity, and environmental sustainability.
 
-By combining millions of taxi trip records with historical weather data, we aim to answer key business questions:
-- How does demand spike in specific boroughs during bad weather?
-- What are the highest weather-correlated demand shifts?
-- How do fares and trip durations change under different weather conditions?
+By unifying millions of taxi trip records with high-resolution weather data and business reference mappings, we answer critical questions:
+- **Demand Intelligence**: How do extreme weather events shift pickup density and rider behavior?
+- **Financial Integrity**: Auditing fare patterns and airport flat rates for revenue protection.
+- **Sustainability Mandate**: Calculating the carbon footprint of the NYC fleet and its correlation with traffic patterns.
 
 ## 🏗️ Architecture & Workflow
-The project follows the industry-standard **Medallion Architecture**, ensuring data quality and reproducibility at every step.
+The platform follows an "Elite" implementation of the **Medallion Architecture**, hardened with audit metadata and production-grade guardrails.
 
-### 🗺️ End-to-End System Workflow
+### 🗺️ Full-Stack System Workflow
 ```mermaid
 graph TD
     subgraph "1. DATA INGESTION (Python + Airflow)"
         A[External Sources] -->|S3 Parquet| B(ingest_taxi.py)
         A -->|API JSON| C(ingest_weather.py)
         A -->|Static CSV| D(ingest_zone_lookup.py)
+        A -->|dbt Seeds| DS[Reference Mappings]
     end
 
     subgraph "2. BRONZE LAYER (Raw Data)"
         B -->|Bulk Load| E[(RAW_TAXI_TRIPS)]
         C -->|Bulk Load| F[(RAW_WEATHER_HOURLY)]
-        D -->|Bulk Load| G[(RAW_ZONE_LOOKUP)]
+        D -->|Bulk Load| G[(RAW_TAXI_ZONE_LOOKUP)]
     end
 
-    subgraph "3. SILVER LAYER (dbt Staging)"
-        E --> S1[stg_taxi_trips]
-        F --> S2[stg_weather_hourly]
-        G --> S3[stg_zone_lookup]
-        
-        S1 & S2 & S3 --> Q{DQ GUARDRAILS}
-        Q -->|Pass| S1_C[Cleaned Taxi]
-        Q -->|Pass| S2_C[Cleaned Weather]
-        Q -->|Pass| S3_C[Cleaned Zones]
-        Q -.->|Fail| Error[Pipeline Stop]
+    subgraph "3. SILVER LAYER (Cleaned & Hardened)"
+        E & F & G & DS --> S_H{Elite Refactor}
+        S_H --> S1[stg_taxi_trips]
+        S_H --> S2[stg_weather_hourly]
+        S_H --> S3[stg_zone_lookup]
+        S_H --> S4[ref_mappings]
     end
 
-    subgraph "4. GOLD LAYER (Analytics)"
-        S1_C & S2_C & S3_C --> G1[gold_fact_trips]
+    subgraph "4. GOLD LAYER (7-Dimension Star Schema)"
+        S1 & S2 & S3 & S4 --> G1[gold_fact_trips]
         G1 --> G2[gold_agg_demand_weather]
+        G1 --> G3[gold_fact_sustainability]
     end
 
-    subgraph "5. ORCHESTRATION"
+    subgraph "5. VISUAL INTELLIGENCE (Streamlit)"
+        G2 & G3 --> STR[Streamlit Dashboard]
+    end
+
+    subgraph "6. ORCHESTRATION"
         Airflow((Apache Airflow))
-        Airflow -.->|Trigger| B
-        Airflow -.->|Trigger| C
-        Airflow -.->|Trigger| S1
-        Airflow -.->|Trigger| G1
+        Airflow -.->|Dockerized Tasks| B & C & S_H & G1
     end
 
     style Airflow fill:#00d2ff,stroke:#333,stroke-width:2px
-    style Error fill:#ff4b2b,stroke:#333
-    style Q fill:#f9d423,stroke:#333
+    style STR fill:#ff4b2b,stroke:#333,color:#fff
+    style S_H fill:#f9d423,stroke:#333
 ```
-
-### 🔄 The Medallion Logic
-1.  **Bronze (Raw)**: Ingesting raw data from source systems (S3, Open-Meteo API) as-is.
-2.  **Silver (Cleaned)**: Cleaning, validating, and standardizing data using **dbt**.
-3.  **Gold (Curated)**: Creating analytics-ready facts and dimensions for business reporting.
 
 ## 🛠️ Tech Stack
 - **Orchestration**: Apache Airflow (Dockerized)
 - **Data Warehouse**: Snowflake
-- **Transformation**: dbt Core
+- **Transformation**: dbt Core (1.7+)
+- **Visual Intelligence**: **Streamlit**
 - **Ingestion**: Python (Pandas, Requests, Snowflake-Connector)
 - **Environment**: Docker, Python 3.12, `uv`
 
 ---
 
-## 🚀 Project Progress
+## 🚀 Project Progress (The Elite Sprints)
 
-### Phase 1: Bronze Layer (Ingestion) - ✅ 100% Complete
-- [x] **NYC Taxi Data**: Ingested Jan/Feb 2023 Parquet files (~6M rows) using chunked/batch processing.
-- [x] **Weather Data**: Automated ingestion of hourly historical data from Open-Meteo API.
-- [x] **Zone Lookup**: Ingested static NYC TLC geography reference data.
-- [x] **Auditability**: All Bronze tables include `SOURCE_FILE` and `LOADED_AT` audit columns.
+### Sprint 1: Dimensional Foundation - ✅ 100% Complete (Hardened)
+- [x] **Temporal Backbone**: Built `dim_calendar.sql` using Snowflake generator logic (Zero-IO).
+- [x] **Relational Fact Pivot**: Refactored `gold_fact_trips` to link with Calendar and Zone dimensions.
+- [x] **Reference Ingestion (Seeds)**: Implemented version-controlled mappings for Vendors, Payments, Rate Codes, and Emissions.
 
-### Phase 2: Silver Layer (Transformation) - ✅ 100% Complete
-- [x] **dbt Source Declarations**: Defined in `models/sources.yml`.
-- [x] **Schema Routing**: Implemented `generate_schema_name` macro for professional Medallion schema organization.
-- [x] **Taxi Staging Model**: `stg_taxi_trips.sql` implemented with:
-    - [x] Microsecond precision timestamp correction.
-    - [x] MD5 Surrogate Key generation.
-    - [x] Deduplication (keeping the latest `LOADED_AT` version).
-    - [x] Business rule filtering (5.4M clean rows).
-- [x] **Weather Staging Model**: `stg_weather_hourly.sql` implemented with:
-    - [x] Custom `classify_weather` dbt macro for WMO code mapping.
-    - [x] View materialization strategy for cost-efficiency.
-    - [x] Feature engineering (`is_precipitation` flag).
-- [x] **Zone Lookup Staging**: `stg_zone_lookup.sql` implemented with:
-    - [x] Defensive `COALESCE` handling for IDs 264 & 265 ("Unknown" zones).
-    - [x] Table materialization for optimal join performance.
-- [x] **Data Quality Layer**: `schema.yml` validation with `unique` and `not_null` guardrails across all Silver models.
+### Sprint 2: Silver Feature Engineering - 🔄 In Progress
+- [ ] **Sustainability Engine**: Implementing CO2 calculations in `stg_taxi_trips`.
+- [ ] **Anomaly Detection**: Implementing logic for identifying price and distance outliers.
+- [ ] **Silver Quality Gates**: Hardening staging models with robust dbt tests.
 
-### Phase 3: Gold Layer (Analytics) - ✅ 100% Complete
-- [x] **The Single Source of Truth**: `gold_fact_trips.sql` unifies 5.4M taxi trips with hourly weather and zones.
-- [x] **Demand Aggregation**: `gold_agg_demand_weather.sql` provides pre-calculated insights (730x data compression).
-- [x] **Business Intelligence**: Validated weather-demand correlations (Rain spikes demand; Snow crashes it).
-- [x] **Data Trust**: Implemented `schema.yml` guardrails for the entire Gold layer.
+### Sprint 3: The Multi-Fact Gold Layer - 📅 Planned
+- [ ] Implementation of 7-Dimension Star Schema.
+- [ ] Multi-Fact tables for Demand, Financials, and Sustainability.
 
-### Phase 4: Orchestration (Airflow & Docker) - 🔄 In Progress
-- [ ] Dockerizing the environment
-- [ ] Airflow DAG development
-- [ ] End-to-end pipeline automation
+### Sprint 4: Hardened Orchestration & Visuals - 📅 Planned
+- [ ] Dockerized Airflow DAGs with Short-Circuit Quality Gates.
+- [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 
 ---
 
 ## ⚙️ Project Setup & Commands Used
 
 ### 1. Python Environment Setup (using `uv`)
-We use [`uv`](https://github.com/astral-sh/uv) to manage our Python virtual environment and dependencies for speed and efficiency.
-*   `uv venv --python 3.12` - Creates an isolated environment.
-*   `uv add requirements.txt` - Installs dependencies.
+*   `uv venv --python 3.12`
+*   `uv add requirements.txt`
 
-### 2. dbt Execution
-Commands are executed from the `dbt/urbanflow` directory:
-*   `uv run dbt run --select silver` - Materializes all Silver models.
-*   `uv run dbt test --select silver` - Executes all Data Quality guardrails for the Silver layer.
-*   `uv run dbt run --select gold` - Materializes the analytics layer.
-*   `uv run dbt test --select gold` - Verifies the integrity of the Gold layer.
+### 2. dbt Elite Commands
+*   `uv run dbt seed` - Loads the Reference Layer into Snowflake.
+*   `uv run dbt run --select silver` - Materializes the Hardened Silver layer.
+*   `uv run dbt run --select gold` - Finalizes the Analytics Star Schema.
 
 ### 📚 Learning Resources
-Detailed architectural deep-dives and "Elite Engineering" patterns are documented in the following repository:
-*   [`Learnings/dbt/01_basic_config_FAQs.md`](Learnings/dbt/01_basic_config_FAQs.md) - dbt configuration intuition.
-*   [`Learnings/dbt/02_Silver_Stage_Taxi_Trips.md`](Learnings/dbt/02_Silver_Stage_Taxi_Trips.md) - Silver layer design patterns for event data.
-*   [`Learnings/dbt/03_Silver_Stage_Weather_Hourly.md`](Learnings/dbt/03_Silver_Stage_Weather_Hourly.md) - Silver layer design patterns for time-series data.
-*   [`Learnings/dbt/04_Silver_Stage_Lookup_zone.md`](Learnings/dbt/04_Silver_Stage_Lookup_zone.md) - Defensive engineering for reference data.
-*   [`Learnings/dbt/05_Gold_Stage.md`](Learnings/dbt/05_Gold_Stage.md) - Gold layer architecture and analytics insights.
-
+Detailed architectural deep-dives are documented in the following repository:
+*   [`Learnings/dbt/`](Learnings/dbt/) - dbt configuration intuition and design patterns.
+*   [`Learnings/Snowflake/`](Learnings/Snowflake/) - RBAC and performance optimization patterns.
