@@ -40,3 +40,6 @@ models:
     gold:
       # Everything under models/gold will have a custom schema named gold
       +schema: gold
+seeds:
+  urbanflow:
+    +schema: silver

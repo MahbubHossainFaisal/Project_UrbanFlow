@@ -27,4 +27,6 @@ joined AS (
         ON t.pickup_location_id = z.location_id
 )
 
-SELECT * FROM joined
+SELECT *,
+CURRENT_TIMESTAMP() AS last_updated_at
+FROM joined

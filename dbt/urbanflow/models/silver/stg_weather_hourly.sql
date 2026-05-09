@@ -29,7 +29,8 @@ final as (
         case 
             when precipitation > 0 or snowfall > 0 then true 
             else false 
-        end as is_precipitation
+        end as is_precipitation,
+        CURRENT_TIMESTAMP() as dbt_updated_at
     from renamed
 )
 

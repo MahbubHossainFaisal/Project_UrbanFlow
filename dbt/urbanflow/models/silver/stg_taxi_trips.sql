@@ -53,7 +53,8 @@ enriched AS (
     DATEDIFF('minute',pickup_datetime,dropoff_datetime) AS trip_duration_minutes,
     EXTRACT(HOUR FROM pickup_datetime) AS pickup_hour,
     DAYOFWEEK(pickup_datetime) AS pickup_day_of_week,
-    DATE_TRUNC('hour', pickup_datetime) AS pickup_hour_truncated
+    DATE_TRUNC('hour', pickup_datetime) AS pickup_hour_truncated,
+    CURRENT_TIMESTAMP() as dbt_updated_at
     FROM filtered
 )
 
@@ -72,5 +73,6 @@ SELECT
     dropoff_location_id,
     fare_amount,
     source_file,
-    loaded_at
+    loaded_at,
+    dbt_updated_at
 FROM enriched

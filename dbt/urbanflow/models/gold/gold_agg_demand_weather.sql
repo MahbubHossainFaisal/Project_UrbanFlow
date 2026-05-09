@@ -33,4 +33,6 @@ final_agg AS(
 
 )
 
-SELECT * FROM final_agg
+SELECT *,
+CURRENT_TIMESTAMP() AS last_aggregated_at
+FROM final_agg
