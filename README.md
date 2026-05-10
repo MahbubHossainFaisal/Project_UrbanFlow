@@ -72,14 +72,16 @@ graph TD
 - [x] **Relational Fact Pivot**: Refactored `gold_fact_trips` to link with Calendar and Zone dimensions.
 - [x] **Reference Ingestion (Seeds)**: Implemented version-controlled mappings for Vendors, Payments, Rate Codes, and Emissions.
 
-### Sprint 2: Silver Feature Engineering - 🔄 In Progress
-- [ ] **Sustainability Engine**: Implementing CO2 calculations in `stg_taxi_trips`.
-- [ ] **Anomaly Detection**: Implementing logic for identifying price and distance outliers.
-- [ ] **Silver Quality Gates**: Hardening staging models with robust dbt tests.
+### Sprint 2: Silver Feature Engineering - ✅ 100% Complete
+- [x] **Sustainability Engine**: Implemented CO2 calculations in `stg_taxi_trips` using vendor emission factors.
+- [x] **Anomaly Detection**: Successfully flagged 81 outliers (Distance > 100mi, Fare > $500).
+- [x] **Silver Quality Gates**: Hardened staging models with robust dbt tests.
+- [x] **The Clean Aggregate**: Refactored `gold_agg_demand_weather` to exclude anomalies and include CO2 metrics.
 
-### Sprint 3: The Multi-Fact Gold Layer - 📅 Planned
-- [ ] Implementation of 7-Dimension Star Schema.
-- [ ] Multi-Fact tables for Demand, Financials, and Sustainability.
+### Sprint 3: The Multi-Fact Gold Layer - 🔄 In Progress
+- [x] **Financial Integrity Fact**: Dedicated table for airport flat-rate auditing (Successfully identified JFK $70 signal).
+- [ ] **Sustainability Fact**: Specialized grain for carbon emission analysis.
+- [ ] **Multi-Fact Star Schema**: Finalizing the 7-Dimension, 3-Fact relationship model.
 
 ### Sprint 4: Hardened Orchestration & Visuals - 📅 Planned
 - [ ] Dockerized Airflow DAGs with Short-Circuit Quality Gates.

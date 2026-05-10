@@ -29,3 +29,17 @@ models:
         tests:
           - unique
           - not_null
+      - name: co2_emission_grams
+        description: "Estimated CO2 footprint based on trip distance and vendor emission factors."
+        tests:
+          - not_null
+
+      - name: is_distance_anomaly
+        description: "Flag for trips > 100 miles. (Found 56 in current batch)"
+        tests:
+          - not_null
+
+      - name: is_fare_anomaly
+        description: "Flag for fares > $500. (Found 25 in current batch)"
+        tests:
+          - not_null

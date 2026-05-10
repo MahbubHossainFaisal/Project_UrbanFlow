@@ -20,6 +20,8 @@ casting AS (
     CAST(TRIP_DISTANCE AS FLOAT) AS trip_distance,
     CAST(PULOCATIONID AS INT) AS pickup_location_id,
     CAST(DOLOCATIONID AS INT) AS dropoff_location_id,
+    CAST(RATECODEID AS INT) AS rate_code_id,
+    CAST(PAYMENT_TYPE AS INT) AS payment_type_id,
     CAST(FARE_AMOUNT AS FLOAT) AS fare_amount,
     SOURCE_FILE,
     LOADED_AT
@@ -56,23 +58,25 @@ enriched AS (
     DATE_TRUNC('hour', pickup_datetime) AS pickup_hour_truncated,
     CURRENT_TIMESTAMP() as dbt_updated_at
     FROM filtered
+),
+
+emission_factors AS(
+    SELECT * FROM {{ ref('seed_emission_factors') }}
+),
+
+feature_engineering AS(
+    SELECT
+    e.*,
+    -- For unknown vendors
+    COALESCE(ef.emission_factor_g_mile,406.0) AS emission_factor,
+    -- CO2 grams
+    (e.trip_distance * COALESCE(ef.emission_factor_g_mile,406.0)) AS co2_emission_grams,
+    --Anomaly Detection
+    CASE WHEN e.trip_distance > 100 THEN TRUE ELSE FALSE END AS is_distance_anomaly,
+    CASE WHEN e.fare_amount > 500 THEN TRUE ELSE FALSE END AS is_fare_anomaly
+    FROM enriched e
+    LEFT JOIN emission_factors ef
+        ON e.vendor_id = ef.vendor_id
 )
 
-SELECT
-    trip_id,
-    vendor_id,
-    pickup_datetime,
-    dropoff_datetime,
-    pickup_hour,
-    pickup_hour_truncated,
-    pickup_day_of_week,
-    trip_duration_minutes,
-    passenger_count,
-    trip_distance,
-    pickup_location_id,
-    dropoff_location_id,
-    fare_amount,
-    source_file,
-    loaded_at,
-    dbt_updated_at
-FROM enriched
+SELECT * FROM feature_engineering
