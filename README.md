@@ -59,8 +59,9 @@ graph TD
 Our Gold Layer is designed as a **Multi-Fact Star Schema**, enabling complex cross-functional analysis across mobility, finance, and environment.
 
 ```mermaid
+%%{init: {'theme': 'base', 'look': 'handDrawn', 'themeVariables': { 'primaryColor': '#f9f9f9', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#f4f4f4'}}}%%
 erDiagram
-    %% Fact Tables
+    %% Fact Tables (Action/Metric Centers)
     FACT_TRIPS {
         string trip_id PK
         int pickup_date_id FK
@@ -91,26 +92,26 @@ erDiagram
         float co2_per_passenger_mile
     }
 
-    %% Conformed Dimensions
-    DIM_CALENDAR ||--o{ FACT_TRIPS : "date_id"
-    DIM_CALENDAR ||--o{ FACT_FINANCIALS : "date_id"
-    DIM_CALENDAR ||--o{ FACT_SUSTAINABILITY : "date_id"
+    %% Conformed Dimensions (The Anchors)
+    DIM_CALENDAR ||--o{ FACT_TRIPS : "links"
+    DIM_CALENDAR ||--o{ FACT_FINANCIALS : "links"
+    DIM_CALENDAR ||--o{ FACT_SUSTAINABILITY : "links"
 
-    DIM_ZONES ||--o{ FACT_TRIPS : "location_id"
-    DIM_ZONES ||--o{ FACT_SUSTAINABILITY : "location_id"
+    DIM_ZONES ||--o{ FACT_TRIPS : "links"
+    DIM_ZONES ||--o{ FACT_SUSTAINABILITY : "links"
 
-    DIM_VENDORS ||--o{ FACT_TRIPS : "vendor_id"
-    DIM_VENDORS ||--o{ FACT_FINANCIALS : "vendor_id"
-    DIM_VENDORS ||--o{ FACT_SUSTAINABILITY : "vendor_id"
+    DIM_VENDORS ||--o{ FACT_TRIPS : "links"
+    DIM_VENDORS ||--o{ FACT_FINANCIALS : "links"
+    DIM_VENDORS ||--o{ FACT_SUSTAINABILITY : "links"
 
-    DIM_RATE_CODES ||--o{ FACT_TRIPS : "rate_code_id"
-    DIM_RATE_CODES ||--o{ FACT_FINANCIALS : "rate_code_id"
-    DIM_RATE_CODES ||--o{ FACT_SUSTAINABILITY : "rate_code_id"
+    DIM_RATE_CODES ||--o{ FACT_TRIPS : "links"
+    DIM_RATE_CODES ||--o{ FACT_FINANCIALS : "links"
+    DIM_RATE_CODES ||--o{ FACT_SUSTAINABILITY : "links"
 
-    DIM_PAYMENT_TYPES ||--o{ FACT_TRIPS : "payment_type_id"
-    DIM_PAYMENT_TYPES ||--o{ FACT_FINANCIALS : "payment_type_id"
+    DIM_PAYMENT_TYPES ||--o{ FACT_TRIPS : "links"
+    DIM_PAYMENT_TYPES ||--o{ FACT_FINANCIALS : "links"
 
-    DIM_WEATHER ||--o{ FACT_TRIPS : "weather_code"
+    DIM_WEATHER ||--o{ FACT_TRIPS : "links"
 ```
 
 ## 🛠️ Tech Stack
