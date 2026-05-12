@@ -55,6 +55,64 @@ graph TD
     style S_H fill:#f9d423,stroke:#333
 ```
 
+## 📊 Data Model (Star Schema)
+Our Gold Layer is designed as a **Multi-Fact Star Schema**, enabling complex cross-functional analysis across mobility, finance, and environment.
+
+```mermaid
+erDiagram
+    %% Fact Tables
+    FACT_TRIPS {
+        string trip_id PK
+        int pickup_date_id FK
+        int vendor_id FK
+        int pickup_location_id FK
+        int dropoff_location_id FK
+        int rate_code_id FK
+        int payment_type_id FK
+        int weather_code FK
+    }
+    
+    FACT_FINANCIALS {
+        string trip_id PK
+        int pickup_date_id FK
+        int vendor_id FK
+        int rate_code_id FK
+        int payment_type_id FK
+        float fare_amount
+        float fare_variance
+    }
+
+    FACT_SUSTAINABILITY {
+        string trip_id PK
+        int pickup_date_id FK
+        int vendor_id FK
+        int pickup_location_id FK
+        float co2_emission_kg
+        float co2_per_passenger_mile
+    }
+
+    %% Conformed Dimensions
+    DIM_CALENDAR ||--o{ FACT_TRIPS : "date_id"
+    DIM_CALENDAR ||--o{ FACT_FINANCIALS : "date_id"
+    DIM_CALENDAR ||--o{ FACT_SUSTAINABILITY : "date_id"
+
+    DIM_ZONES ||--o{ FACT_TRIPS : "location_id"
+    DIM_ZONES ||--o{ FACT_SUSTAINABILITY : "location_id"
+
+    DIM_VENDORS ||--o{ FACT_TRIPS : "vendor_id"
+    DIM_VENDORS ||--o{ FACT_FINANCIALS : "vendor_id"
+    DIM_VENDORS ||--o{ FACT_SUSTAINABILITY : "vendor_id"
+
+    DIM_RATE_CODES ||--o{ FACT_TRIPS : "rate_code_id"
+    DIM_RATE_CODES ||--o{ FACT_FINANCIALS : "rate_code_id"
+    DIM_RATE_CODES ||--o{ FACT_SUSTAINABILITY : "rate_code_id"
+
+    DIM_PAYMENT_TYPES ||--o{ FACT_TRIPS : "payment_type_id"
+    DIM_PAYMENT_TYPES ||--o{ FACT_FINANCIALS : "payment_type_id"
+
+    DIM_WEATHER ||--o{ FACT_TRIPS : "weather_code"
+```
+
 ## 🛠️ Tech Stack
 - **Orchestration**: Apache Airflow (Dockerized)
 - **Data Warehouse**: Snowflake
@@ -78,12 +136,12 @@ graph TD
 - [x] **Silver Quality Gates**: Hardened staging models with robust dbt tests.
 - [x] **The Clean Aggregate**: Refactored `gold_agg_demand_weather` to exclude anomalies and include CO2 metrics.
 
-### Sprint 3: The Multi-Fact Gold Layer - 🔄 In Progress
+### Sprint 3: The Multi-Fact Gold Layer - ✅ 100% Complete
 - [x] **Financial Integrity Fact**: Dedicated table for airport flat-rate auditing (Successfully identified JFK $70 signal).
-- [ ] **Sustainability Fact**: Specialized grain for carbon emission analysis.
-- [ ] **Multi-Fact Star Schema**: Finalizing the 7-Dimension, 3-Fact relationship model.
+- [x] **Sustainability Fact**: Specialized grain for carbon emission analysis and policy intelligence (`is_short_efficiency_risk`).
+- [x] **Multi-Fact Star Schema**: Finalized the conformed 7-Dimension, 3-Fact model (Trips, Financials, Sustainability).
 
-### Sprint 4: Hardened Orchestration & Visuals - 📅 Planned
+### Sprint 4: Hardened Orchestration & Visuals - 🔄 In Progress
 - [ ] Dockerized Airflow DAGs with Short-Circuit Quality Gates.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 
