@@ -37,3 +37,4 @@ This role defines our partnership. It is grounded in the principles of **Product
 - **Transformation Strategy**: Use dbt for all Silver and Gold transformations.
 - **Documentation**: Maintain a `Learnings/` repository for all architectural patterns.
 - **Naming Conventions**: Snowflake objects should be UPPERCASE; dbt models should be lowercase.
+- **Diagramming Style**: For all technical diagrams (Mermaid), always use the 'Excalidraw-style' aesthetic. Ensure every Mermaid block starts with this initialization: `%%{init: {'theme': 'base', 'look': 'handDrawn', 'themeVariables': { 'primaryColor': '#f9f9f9', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#f4f4f4'}}}%%`.

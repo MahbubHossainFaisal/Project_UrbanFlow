@@ -143,7 +143,8 @@ erDiagram
 - [x] **Multi-Fact Star Schema**: Finalized the conformed 7-Dimension, 3-Fact model (Trips, Financials, Sustainability).
 
 ### Sprint 4: Hardened Orchestration & Visuals - 🔄 In Progress
-- [ ] Dockerized Airflow DAGs with Short-Circuit Quality Gates.
+- [ ] **Elite Ingestion Framework**: Refactoring legacy scripts into a modular, OOP-based engine (Core Config, Snowflake Client, Template Pattern).
+- [ ] **Dockerized Airflow DAGs**: Transitioning the Modular Engine into containerized tasks with Short-Circuit Quality Gates.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 
 ---
@@ -161,5 +162,6 @@ erDiagram
 
 ### 📚 Learning Resources
 Detailed architectural deep-dives are documented in the following repository:
+*   [`Learnings/Data_Ingestion/`](Learnings/Data_Ingestion/) - Modular framework design and Python Singleton patterns.
 *   [`Learnings/dbt/`](Learnings/dbt/) - dbt configuration intuition and design patterns.
 *   [`Learnings/Snowflake/`](Learnings/Snowflake/) - RBAC and performance optimization patterns.

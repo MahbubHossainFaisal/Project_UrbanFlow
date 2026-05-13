@@ -95,6 +95,24 @@ A **Full-Stack Data Infrastructure** that:
 
 ## 8. Phase-by-Phase Implementation Guide
 
+### Phase 1: Ingestion & Infrastructure (Hardened)
+
+**Goal:** Extract data from diverse sources and load them into the Snowflake Bronze layer using a **Modular Framework**.
+
+**Task 1.1: The Elite Engine**
+- **Action**: Build a `core/` module with a Singleton `config.py` for "Fail-Fast" validation and a `database.py` using Context Managers for Snowflake connection lifecycles.
+- **Requirement**: Abstract common logic (Logging, Connections, Config) to prevent code duplication.
+
+**Task 1.2: The Template Pattern**
+- **Action**: Implement a `BaseIngestor` class that defines the standardized extraction/loading workflow.
+- **Requirement**: Refactor `taxi`, `weather`, and `zone` scripts to inherit from the base engine.
+
+**Task 1.3: Bronze Ingestion**
+- **Action**: Load the following into `URBANFLOW_DB.BRONZE`:
+    - `RAW_TAXI_TRIPS` (Parquet files)
+    - `RAW_WEATHER_HOURLY` (API JSON)
+    - `RAW_TAXI_ZONE_LOOKUP` (CSV)
+
 ### Phase 5: Visual Intelligence (Streamlit)
 
 **Goal:** Provide a self-service analytics platform for TLC executives.
