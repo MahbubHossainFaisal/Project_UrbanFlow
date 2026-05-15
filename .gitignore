@@ -43,3 +43,6 @@ airflow-webserver.pid
 .idea/
 *.swp
 *.bak
+
+# AI prompt
+GEMINI.md

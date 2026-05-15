@@ -142,10 +142,14 @@ erDiagram
 - [x] **Sustainability Fact**: Specialized grain for carbon emission analysis and policy intelligence (`is_short_efficiency_risk`).
 - [x] **Multi-Fact Star Schema**: Finalized the conformed 7-Dimension, 3-Fact model (Trips, Financials, Sustainability).
 
-### Sprint 4: Hardened Orchestration & Visuals - 🔄 In Progress
-- [ ] **Elite Ingestion Framework**: Refactoring legacy scripts into a modular, OOP-based engine (Core Config, Snowflake Client, Template Pattern).
-- [ ] **Dockerized Airflow DAGs**: Transitioning the Modular Engine into containerized tasks with Short-Circuit Quality Gates.
+### Sprint 4: Hardened Orchestration & Infrastructure - 🔄 In Progress
+- [x] **Elite Ingestion Framework**: Refactored core infrastructure into a modular, OOP-based engine.
+  - [x] **The Gatekeeper (Config)**: Centralized secret management with Fail-Fast validation.
+  - [x] **The Engine (Database)**: Context-managed Snowflake client for leak-proof execution.
+- [ ] **The Blueprint (Base Ingestor)**: Implementing the Template Method Pattern for standardized job lifecycles.
+- [ ] **Legacy Migration**: Refactoring functional scripts into the new Modular Framework.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
+- [ ] **Dockerized Airflow DAGs**: Final orchestration of the hardened pipeline.
 
 ---
 
