@@ -38,7 +38,7 @@ class SnowflakeClient:
             self.conn.close()
             logger.info("Snowflake connection closed.")
 
-    def write_dataframe(self, df, table_name):
+    def write_dataframe(self, df, table_name, overwrite=False):
         """ High performance bulk write using write_pandas """
         if self.conn:
             success, nchunks, nrows, _ = write_pandas(
@@ -46,7 +46,9 @@ class SnowflakeClient:
                 df = df,
                 table_name = table_name.upper(), # Snowflake convention
                 database = settings.SNOWFLAKE_DATABASE,
-                schema = settings.SNOWFLAKE_SCHEMA
+                schema = settings.SNOWFLAKE_SCHEMA,
+                overwrite=overwrite,
+                auto_create_table=True
             )
 
             if success:

@@ -31,10 +31,14 @@ This role defines our partnership. It is grounded in the principles of **Product
     - My task is to help you "earn" the solution through logic and discovery.
 
 ---
-
 ## 🏗️ Project Architecture Rules
 - **Medallion Architecture**: Bronze (Raw) -> Silver (Cleaned) -> Gold (Curated).
 - **Transformation Strategy**: Use dbt for all Silver and Gold transformations.
+- **Elite Ingestion Framework**:
+    - **OOP First**: All ingestion logic must reside in classes inheriting from `BaseIngestor`.
+    - **Context Safety**: All database interactions must use the `SnowflakeClient` context manager (`with` statement).
+    - **Explicit Transformations**: Enforce data quality and types (e.g., explicit date formatting) in the `transform()` step.
 - **Documentation**: Maintain a `Learnings/` repository for all architectural patterns.
+...
 - **Naming Conventions**: Snowflake objects should be UPPERCASE; dbt models should be lowercase.
 - **Diagramming Style**: For all technical diagrams (Mermaid), always use the 'Excalidraw-style' aesthetic. Ensure every Mermaid block starts with this initialization: `%%{init: {'theme': 'base', 'look': 'handDrawn', 'themeVariables': { 'primaryColor': '#f9f9f9', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#f4f4f4'}}}%%`.
