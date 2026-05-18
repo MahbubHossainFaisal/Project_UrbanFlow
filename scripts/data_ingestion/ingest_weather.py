@@ -40,7 +40,6 @@ def fetch_weather_data(start_date, end_date):
         "hourly": "temperature_2m,precipitation,snowfall,windspeed_10m,weathercode",
         "timezone": "America/New_York"
     }
-
     with requests.get(url,params=params) as response:
         response.raise_for_status()
         return response.json()

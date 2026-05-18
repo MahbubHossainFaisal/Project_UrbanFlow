@@ -147,7 +147,7 @@ erDiagram
   - [x] **The Gatekeeper (Config)**: Centralized secret management with Fail-Fast validation.
   - [x] **The Engine (Database)**: Context-managed Snowflake client for leak-proof execution.
 - [x] **The Blueprint (Base Ingestor)**: Implemented the Template Method Pattern for standardized job lifecycles.
-- [ ] **Legacy Migration**: Refactoring functional scripts into the new Modular Framework (1/3 Completed - Zone Lookup).
+- [ ] **Legacy Migration**: Refactoring functional scripts into the new Modular Framework (2/3 Completed - Zone & Weather).
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 - [ ] **Dockerized Airflow DAGs**: Final orchestration of the hardened pipeline.
 

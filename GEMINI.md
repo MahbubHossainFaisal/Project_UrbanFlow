@@ -38,6 +38,8 @@ This role defines our partnership. It is grounded in the principles of **Product
     - **OOP First**: All ingestion logic must reside in classes inheriting from `BaseIngestor`.
     - **Context Safety**: All database interactions must use the `SnowflakeClient` context manager (`with` statement).
     - **Explicit Transformations**: Enforce data quality and types (e.g., explicit date formatting) in the `transform()` step.
+    - **Audit Integrity**: For API-based ingestion, always capture and store the full `actual_request_url` (with parameters).
+    - **Fail Loudly**: Child classes must `raise` exceptions to the `BaseIngestor` rather than returning `None`.
 - **Documentation**: Maintain a `Learnings/` repository for all architectural patterns.
 ...
 - **Naming Conventions**: Snowflake objects should be UPPERCASE; dbt models should be lowercase.
