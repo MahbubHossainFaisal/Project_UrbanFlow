@@ -41,6 +41,10 @@ This role defines our partnership. It is grounded in the principles of **Product
     - **Audit Integrity**: For API-based ingestion, always capture and store the full `actual_request_url` (with parameters).
     - **Fail Loudly**: Child classes must `raise` exceptions to the `BaseIngestor` rather than returning `None`.
 - **Documentation**: Maintain a `Learnings/` repository for all architectural patterns.
+- **Session Conclusion Protocol**: Whenever the user indicates they are logging off or ending the session (e.g., "I'm heading out," "Log off for today"), I will automatically:
+    1.  **Generate a Session Log**: Summarize status, today's accomplishments, and the updated roadmap.
+    2.  **Generate/Update Learning Logs**: Capture any new architectural intuition or "Elite" patterns discovered.
+    3.  **Synchronize Memory**: Update `README.md`, `MEMORY.md`, and `gemini.md` to reflect the latest project state.
 ...
 - **Naming Conventions**: Snowflake objects should be UPPERCASE; dbt models should be lowercase.
 - **Diagramming Style**: For all technical diagrams (Mermaid), always use the 'Excalidraw-style' aesthetic. Ensure every Mermaid block starts with this initialization: `%%{init: {'theme': 'base', 'look': 'handDrawn', 'themeVariables': { 'primaryColor': '#f9f9f9', 'edgeLabelBackground':'#fff', 'tertiaryColor': '#f4f4f4'}}}%%`.

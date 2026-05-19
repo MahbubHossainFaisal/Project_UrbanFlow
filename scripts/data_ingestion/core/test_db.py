@@ -11,9 +11,9 @@ def test_connection():
     try:
         with SnowflakeClient() as db:
             cursor = db.conn.cursor()
-            cursor.execute("SELECT CURRENT_VERSION(), CURRENT_WAREHOUSE(), CURRENT_DATABASE()")
-            version, wh, db_name = cursor.fetchone()
-            logger.info(f"Connected! Version: {version} | WH: {wh} | DB: {db_name}")
+            cursor.execute("SELECT COUNT(*) FROM RAW_TAXI_TRIPS")
+            count = cursor.fetchone()[0]
+            logger.info(f"Current Row Count in RAW_TAXI_TRIPS: {count}")
         logger.info("Test finished! Connection should be closed now.")
     except Exception as e:
         logger.error(f"Test Failed: {e}")

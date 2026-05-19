@@ -27,7 +27,7 @@ class BaseIngestor(ABC):
         """Standardized loading logic using SnowflakeClient"""
         logger.info(f"Starting load for table: {self.table_name}")
         with SnowflakeClient() as db:
-            db.write_dataframe(df,self.table_name,overwrite=self.overwrite)
+            return db.write_dataframe(df,self.table_name,overwrite=self.overwrite)
         
     def run(self):
         """ Master lifecycle method. """

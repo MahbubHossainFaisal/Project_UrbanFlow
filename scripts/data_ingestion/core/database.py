@@ -53,5 +53,7 @@ class SnowflakeClient:
 
             if success:
                 logger.info(f"Successfully loaded {nrows} rows into {table_name}.")
+                return nrows
             else:
                 logger.error(f"Failed to load data into {table_name}")
+                return 0
