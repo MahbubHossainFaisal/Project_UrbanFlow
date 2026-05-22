@@ -151,9 +151,9 @@ erDiagram
 - [x] **The Verification Loop**: Hardened the dbt-layer unique keys and corrected timestamp drift (The "Epoch Trap") across the 5.5M+ record dataset.
 
 ### Phase 5: Orchestration & Visual Intelligence - 🔄 In Progress
-- [ ] **Dockerized Airflow DAGs**: Transitioning the validated framework into an automated schedule.
+- [x] **Dockerized Foundation**: Containerized the entire stack (Airflow, Postgres, dbt) with volume mounting for real-time development.
+- [ ] **Automated DAGs**: Defining the "Workflow as Code" to schedule the 5.5M+ record pipeline.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
-- [ ] **Cloud-Ready Containerization**: Packaging the entire stack for deployment.
 
 ---
 
@@ -163,9 +163,14 @@ erDiagram
 *   `uv venv --python 3.12`
 *   `uv add requirements.txt`
 
-### 2. dbt Elite Commands
+### 2. Docker & Airflow Commands
+*   `docker compose up --build` - Builds the custom image and starts the orchestration fleet.
+*   `docker compose down` - Safely stops and removes containers.
+*   **Airflow UI**: `http://localhost:8080` (Default: admin/admin)
+
+### 3. dbt Elite Commands
 *   `uv run dbt build` - Executes Seeds, Models, and Tests in a single "Verification Loop."
-*   `uv run dbt build --full-refresh` - Purges and rebuilds the Medallion layers (Used for schema/logic changes).
+*   `uv run dbt build --full-refresh` - Purges and rebuilds the Medallion layers.
 
 ### 📚 Learning Resources
 Detailed architectural deep-dives are documented in the following repository:
