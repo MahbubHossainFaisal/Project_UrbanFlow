@@ -14,8 +14,8 @@ casting AS (
     
     SELECT
     CAST(VENDORID AS INT) AS vendor_id,
-    TO_TIMESTAMP_NTZ(EXTRACT(EPOCH_SECONDS FROM TPEP_PICKUP_DATETIME) / 1000000) AS pickup_datetime,
-    TO_TIMESTAMP_NTZ(EXTRACT(EPOCH_SECONDS FROM TPEP_DROPOFF_DATETIME) / 1000000) AS dropoff_datetime,
+    CAST(TPEP_PICKUP_DATETIME AS TIMESTAMP_NTZ) AS pickup_datetime,
+    CAST(TPEP_DROPOFF_DATETIME AS TIMESTAMP_NTZ) AS dropoff_datetime,
     CAST(PASSENGER_COUNT AS INT) AS passenger_count,
     CAST(TRIP_DISTANCE AS FLOAT) AS trip_distance,
     CAST(PULOCATIONID AS INT) AS pickup_location_id,
@@ -31,7 +31,7 @@ casting AS (
 deduplicated AS (
     SELECT 
     *, ROW_NUMBER() OVER(
-        PARTITION BY vendor_id, pickup_datetime, pickup_location_id
+        PARTITION BY vendor_id, pickup_datetime, dropoff_datetime, pickup_location_id
         ORDER BY LOADED_AT DESC
     ) AS row_num
 
@@ -50,7 +50,7 @@ filtered AS (
 
 enriched AS (
     SELECT
-    MD5(vendor_id || '-' || pickup_datetime || '-' || pickup_location_id) AS trip_id,
+    MD5(vendor_id || '-' || pickup_datetime || '-' || dropoff_datetime || '-' || pickup_location_id) AS trip_id,
     *,
     DATEDIFF('minute',pickup_datetime,dropoff_datetime) AS trip_duration_minutes,
     EXTRACT(HOUR FROM pickup_datetime) AS pickup_hour,

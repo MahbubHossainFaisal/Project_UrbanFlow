@@ -142,14 +142,18 @@ erDiagram
 - [x] **Sustainability Fact**: Specialized grain for carbon emission analysis and policy intelligence (`is_short_efficiency_risk`).
 - [x] **Multi-Fact Star Schema**: Finalized the conformed 7-Dimension, 3-Fact model (Trips, Financials, Sustainability).
 
-### Sprint 4: Hardened Orchestration & Infrastructure - 🔄 In Progress
+### Sprint 4: Hardened Infrastructure & High-Volume Validation - ✅ 100% Complete
 - [x] **Elite Ingestion Framework**: Refactored core infrastructure into a modular, OOP-based engine.
   - [x] **The Gatekeeper (Config)**: Centralized secret management with Fail-Fast validation.
   - [x] **The Engine (Database)**: Context-managed Snowflake client for leak-proof execution.
-- [x] **The Blueprint (Base Ingestor)**: Implemented the Template Method Pattern for standardized job lifecycles.
-- [x] **Legacy Migration**: Refactoring functional scripts into the new Modular Framework (100% Completed - Zone, Weather, & Taxi).
+- [x] **High-Volume Ingestion (The "Boss Fight")**: Implemented batch-processing for 5.5M+ Taxi records with constant memory overhead.
+- [x] **Legacy Migration**: Refactored all functional scripts into the Modular Framework (Zone, Weather, & Taxi).
+- [x] **The Verification Loop**: Hardened the dbt-layer unique keys and corrected timestamp drift (The "Epoch Trap") across the 5.5M+ record dataset.
+
+### Phase 5: Orchestration & Visual Intelligence - 🔄 In Progress
+- [ ] **Dockerized Airflow DAGs**: Transitioning the validated framework into an automated schedule.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
-- [ ] **Dockerized Airflow DAGs**: Final orchestration of the hardened pipeline.
+- [ ] **Cloud-Ready Containerization**: Packaging the entire stack for deployment.
 
 ---
 
@@ -160,9 +164,8 @@ erDiagram
 *   `uv add requirements.txt`
 
 ### 2. dbt Elite Commands
-*   `uv run dbt seed` - Loads the Reference Layer into Snowflake.
-*   `uv run dbt run --select silver` - Materializes the Hardened Silver layer.
-*   `uv run dbt run --select gold` - Finalizes the Analytics Star Schema.
+*   `uv run dbt build` - Executes Seeds, Models, and Tests in a single "Verification Loop."
+*   `uv run dbt build --full-refresh` - Purges and rebuilds the Medallion layers (Used for schema/logic changes).
 
 ### 📚 Learning Resources
 Detailed architectural deep-dives are documented in the following repository:
