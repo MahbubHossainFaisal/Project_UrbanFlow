@@ -1,46 +1,329 @@
-# dbt Learnings 05: The Gold Layer - Value Creation & Analytics
+# 05 - Gold Stage: Fact Trips and Demand Aggregate
 
-## 🏛️ The Architectural Goal
-The Gold Layer is the "Presentation Layer" of the Medallion Architecture. Its purpose is to transform cleaned, standardized Silver data into highly optimized, business-ready tables. In this phase, we moved from **Data Engineering** to **Data Analytics**.
+## Purpose
+This note explains the first Gold layer models:
 
----
+```text
+dbt/urbanflow/models/gold/gold_fact_trips.sql
+dbt/urbanflow/models/gold/gold_agg_demand_weather.sql
+```
 
-## 💎 1. The Fact Table: Single Source of Truth (`gold_fact_trips`)
-The Fact table unifies disparate business processes into a single record.
-
-### 🛠️ Elite Patterns:
-- **The Trinity Join**: We used a `LEFT JOIN` strategy to anchor the primary event (Taxi Trips) to its context (Weather and Geography).
-- **Grain Preservation**: We verified that joining with reference data did not increase our row count (preventing "Join Fan-out"). 
-- **Surrogate Keys**: Using `MD5` hashes for `trip_id` ensures we can track unique events even across disparate source systems.
+Gold models convert trusted Silver data into business-facing tables.
 
 ---
 
-## 📊 2. The Aggregate Table: Performance Optimization (`gold_agg_demand_weather`)
-We implemented "Summary Grain" tables to serve BI tools and dashboards efficiently.
+## Gold Layer Mental Model
 
-### 💡 Strategic Rationale:
-- **Data Compression**: Reduced **5.4 Million rows** to **7,351 rows** (~730x reduction).
-- **Compute Efficiency**: Dashboards now load instantly by hitting pre-calculated aggregates instead of scanning the full fact table.
-- **Unit Explicitness**: We used the alias `avg_trip_duration_minutes` to eliminate ambiguity for downstream analysts.
+```text
+Silver = clean and reusable row-level data
+Gold   = business-ready facts, dimensions, and aggregates
+```
 
----
+Gold should answer business questions directly:
 
-## 🛡️ 3. Defensive Engineering & Quality Guardrails
-Even in the final layer, we never trust the data implicitly.
-
-### 🧪 Testing Strategy:
-- **Surrogate Key Integrity**: We applied `unique` and `not_null` tests to the `agg_id` in `gold_agg_demand_weather`. This proves that our `GROUP BY` logic didn't accidentally overlap dimensions.
-- **Fact Integrity**: Testing `trip_id` in the Gold Fact table ensures our joins didn't create duplicate trip records.
-
----
-
-## 🧐 4. Hypothesis Testing (The "Business Reality Check")
-Using `dbt show`, we verified real-world business hypotheses before handing data to stakeholders:
-- **Finding**: Rain spikes demand in Manhattan (~3,600 trips/hr).
-- **Finding**: Snow crashes demand (~3,000 trips/hr), proving that extreme weather overrides the need for convenience.
-- **Finding**: Average fares remain stable ($15-$16), suggesting weather affects **Volume** more than **Distance/Pricing**.
+```text
+How many trips happened?
+Where was demand strongest?
+How did weather affect demand?
+How much revenue was generated?
+What was the environmental footprint?
+```
 
 ---
 
-## 🏆 Key Takeaway
-"Data is only as valuable as the decisions it enables." By building the Gold Layer, we transitioned from managing files to managing **Insights**.
+## `gold_fact_trips`
+
+Configuration:
+
+```sql
+{{ config(materialized='table') }}
+```
+
+Meaning:
+
+```text
+Build a physical Snowflake table for the core trip fact.
+```
+
+Why table?
+
+```text
+Gold facts are queried repeatedly by dashboards and analysis.
+Persisting them reduces repeated compute.
+```
+
+---
+
+## Inputs
+
+```sql
+trips    -> ref('stg_taxi_trips')
+weather  -> ref('stg_weather_hourly')
+zones    -> ref('stg_zone_lookup')
+calendar -> ref('dim_calendar')
+```
+
+This model combines:
+
+```text
+trip event data
+hourly weather context
+pickup geography context
+calendar context
+```
+
+---
+
+## Join Strategy
+
+Taxi is the anchor table:
+
+```text
+one row in stg_taxi_trips = one valid trip
+```
+
+All joins are `LEFT JOIN`s:
+
+```sql
+LEFT JOIN weather
+LEFT JOIN zones
+LEFT JOIN calendar
+```
+
+Why left joins?
+
+```text
+Do not drop taxi trips just because context data is missing.
+```
+
+This preserves the primary business event while adding context when available.
+
+---
+
+## Context Added
+
+`gold_fact_trips` adds:
+
+```text
+pickup_date_id
+temperature_2m
+is_precipitation
+weather_category
+pickup_borough
+pickup_zone
+is_holiday
+is_weekend
+holiday_name
+last_updated_at
+```
+
+Important join keys:
+
+```text
+t.pickup_hour_truncated = w.weather_time
+t.pickup_location_id    = z.location_id
+TO_CHAR(t.pickup_datetime, 'YYYYMMDD')::INT = c.date_id
+```
+
+---
+
+## Date Key Logic
+
+```sql
+TO_CHAR(t.pickup_datetime, 'YYYYMMDD')::INT AS pickup_date_id
+```
+
+This creates an integer date key such as:
+
+```text
+20230115
+```
+
+Why integer date key?
+
+```text
+It is compact, easy to join, and common in dimensional modeling.
+```
+
+---
+
+## `gold_agg_demand_weather`
+
+Configuration:
+
+```sql
+{{ config(materialized='table') }}
+```
+
+Purpose:
+
+```text
+Pre-aggregate trip demand, revenue, CO2, and distance metrics by hour, borough, and weather.
+```
+
+This model is dashboard-friendly because it reduces the amount of data Streamlit must scan.
+
+---
+
+## Clean Fact Filter
+
+```sql
+WITH facts AS (
+    SELECT * FROM {{ ref('gold_fact_trips') }}
+    WHERE is_distance_anomaly = FALSE
+        AND is_fare_anomaly = FALSE
+)
+```
+
+Purpose:
+
+```text
+Exclude known distance and fare anomalies from executive aggregate metrics.
+```
+
+We do not delete anomalies in Silver. We flag them. Gold aggregates can then decide whether to exclude them for clean reporting.
+
+---
+
+## Aggregate Grain
+
+Grouped by:
+
+```text
+pickup_hour_truncated
+pickup_day_of_week
+pickup_borough
+weather_category
+is_precipitation
+```
+
+This means:
+
+```text
+one row = one hour + borough + weather slice
+```
+
+---
+
+## Aggregate Metrics
+
+```text
+total_trips
+total_passengers
+total_revenue
+total_co2_grams
+avg_co2_grams_per_trip
+avg_fare_amount
+avg_trip_duration_minutes
+avg_trip_distance
+```
+
+These are dashboard-ready measures.
+
+---
+
+## Aggregate Surrogate Key
+
+```sql
+MD5(
+    COALESCE(CAST(pickup_hour_truncated AS STRING), '_null_') || '-' ||
+    COALESCE(CAST(pickup_borough AS STRING), '_null_') || '-' ||
+    COALESCE(CAST(weather_category AS STRING),'_null_')
+) AS agg_id
+```
+
+Purpose:
+
+```text
+Create a deterministic identifier for each aggregate row.
+```
+
+`COALESCE` avoids null values breaking the hash pattern.
+
+Note:
+
+```text
+The current agg_id includes hour, borough, and weather_category.
+The GROUP BY also includes pickup_day_of_week and is_precipitation.
+This is acceptable if those values are functionally determined by the included fields, but if not, agg_id grain should be reviewed.
+```
+
+---
+
+## Tests
+
+Current Gold tests:
+
+```yaml
+gold_fact_trips.trip_id:
+  - unique
+  - not_null
+
+gold_agg_demand_weather.agg_id:
+  - unique
+  - not_null
+
+gold_agg_demand_weather.total_trips:
+  - not_null
+```
+
+What they protect:
+
+```text
+fact trip grain does not duplicate
+aggregate grain does not overlap
+dashboard metrics are populated
+```
+
+---
+
+## Common Commands
+
+Run from:
+
+```bash
+cd dbt/urbanflow
+```
+
+Build core Gold trip fact:
+
+```bash
+dbt build --select gold_fact_trips
+```
+
+Build demand aggregate:
+
+```bash
+dbt build --select gold_agg_demand_weather
+```
+
+Build both with dependencies:
+
+```bash
+dbt build --select +gold_fact_trips+ +gold_agg_demand_weather
+```
+
+---
+
+## Staff Architect Summary
+
+`gold_fact_trips` creates the core business event table.
+
+`gold_agg_demand_weather` creates a fast dashboard-serving aggregate.
+
+Design principles:
+
+```text
+Keep the fact grain stable.
+Use left joins to preserve primary events.
+Pre-aggregate expensive dashboard questions.
+Filter anomalies intentionally, not accidentally.
+```
+
+---
+
+## Next File To Study
+
+```text
+06_Seeds_and_dim_calendar.md
+```
