@@ -14,8 +14,8 @@ This file is the Codex-side working memory for the `Project_UrbanFlow` repositor
 
 ## Latest Known Status
 Source of truth used for this summary:
-- [GEMINI.md](D:/Project_UrbanFlow/GEMINI.md)
-- [2026-05-23_Session_20.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-23_Session_20.md)
+- [2026-05-24_Session_21.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-24_Session_21.md)
+- [2026-05-25_Session_22.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-25_Session_22.md)
 
 ### Completed
 - Modular OOP ingestion framework is complete.
@@ -27,20 +27,31 @@ Source of truth used for this summary:
   - `Dockerfile`
   - `docker-compose.yml`
   - Airflow webserver, scheduler, and Postgres services
-- `airflow-init` was successfully run and the Airflow UI was verified at `localhost:8080`.
+- Docker Compose hardening pass is complete:
+  - Persistent Postgres metadata volume
+  - Postgres healthcheck
+  - `airflow-init` waits for healthy Postgres
+  - webserver and scheduler wait for successful `airflow-init`
+  - idempotent `airflow-init` using `airflow db migrate`
+  - explicit `.env` injection through `env_file`
+- `docker compose config` passed structural validation.
+- Next runtime validation is pending: start the stack and verify Airflow UI at `localhost:8080`.
 - `requirements.txt` was optimized by removing redundant `apache-airflow`, dramatically reducing build time.
 
 ### Current Focus
 - Phase 5: Orchestration & Visual Intelligence
-- Sprint 5.2: DAG development and scheduling
+- Sprint 5.2: Dockerized Airflow runtime validation, then DAG development and scheduling
 
 ### Next Concrete Tasks
+- Run `docker compose up --build`
+- Verify `airflow-init`, webserver, scheduler, and Airflow UI login
+- Create a minimal proof DAG
 - Build `dags/urbanflow_master_dag.py`
 - Configure Airflow connections for Snowflake and API credentials
 - Implement dependency chain: `Ingest -> dbt build`
 - Start Sprint 5.3 Streamlit dashboard work after DAG orchestration is stable
 
-## Working Mandates From GEMINI.md
+## Working Mandates
 
 ### Role and Collaboration
 - Operate as a STAFF data engineering architect and mentor.
@@ -73,17 +84,19 @@ Source of truth used for this summary:
 ### Documentation Standards
 - Capture reusable patterns and architectural lessons in `Learnings/`.
 - Keep project status synchronized when major milestones shift.
+- Avoid duplicating detailed learning content in session logs. Session logs should capture operational handoff only: work completed, files changed, validation result, current status, and exact resume point. Detailed explanations belong in `Learnings/`.
 
 ### Naming and Diagram Rules
 - Snowflake objects should be `UPPERCASE`.
 - dbt model names should be lowercase.
-- Mermaid technical diagrams should use the hand-drawn initialization block defined in `GEMINI.md`.
+- Mermaid technical diagrams should stay readable, minimal, and aligned with the current project documentation style.
 
 ## Session-End Protocol To Follow
 When the user is wrapping up for the day:
 - Generate/update the session log
 - Capture new learnings in `Learnings/`
-- Synchronize project memory files such as `README.md`, `MEMORY.md`, and `GEMINI.md` as needed
+- Synchronize project memory files such as `README.md` and `MEMORY.md` as needed
+- Keep session logs concise and non-redundant with `Learnings/`
 
 ## Codex Operating Notes
 - This file is repository memory, not global model memory.
