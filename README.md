@@ -152,7 +152,11 @@ erDiagram
 
 ### Phase 5: Orchestration & Visual Intelligence - 🔄 In Progress
 - [x] **Dockerized Foundation**: Containerized the entire stack (Airflow, Postgres, dbt) with volume mounting for real-time development.
+- [x] **Airflow Runtime Validation**: Verified Postgres health, Airflow init, webserver, scheduler, UI login, and metadata DB connectivity.
+- [x] **Airflow Smoke DAG**: Created and successfully ran `urbanflow_smoke_test` to prove DAG discovery and task execution.
+- [x] **dbt Runtime Readiness**: Confirmed `dbt debug` passes inside the Airflow scheduler container and connects to Snowflake.
 - [ ] **Automated DAGs**: Defining the "Workflow as Code" to schedule the 5.5M+ record pipeline.
+- [ ] **dbt Smoke DAG**: Next orchestration proof: `dbt_debug -> dbt_ls` from Airflow.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 
 ---
@@ -167,6 +171,7 @@ erDiagram
 *   `docker compose up --build` - Builds the custom image and starts the orchestration fleet.
 *   `docker compose down` - Safely stops and removes containers.
 *   **Airflow UI**: `http://localhost:8080` (Default: admin/admin)
+*   `docker compose exec airflow-scheduler bash -lc "cd /opt/airflow/dbt/urbanflow && dbt debug"` - Validates dbt from inside the Airflow runtime.
 
 ### 3. dbt Elite Commands
 *   `uv run dbt build` - Executes Seeds, Models, and Tests in a single "Verification Loop."
@@ -176,4 +181,5 @@ erDiagram
 Detailed architectural deep-dives are documented in the following repository:
 *   [`Learnings/Data_Ingestion/`](Learnings/Data_Ingestion/) - Modular framework design and Python Singleton patterns.
 *   [`Learnings/dbt/`](Learnings/dbt/) - dbt configuration intuition and design patterns.
+*   [`Learnings/Orchestration/`](Learnings/Orchestration/) - Dockerized Airflow setup, DAG basics, and dbt orchestration readiness.
 *   [`Learnings/Snowflake/`](Learnings/Snowflake/) - RBAC and performance optimization patterns.
