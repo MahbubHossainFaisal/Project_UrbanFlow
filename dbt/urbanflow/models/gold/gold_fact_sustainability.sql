@@ -23,5 +23,5 @@ environmental_metrics AS(
 
 SELECT
       *,
-      CURRENT_TIMESTAMP() AS dbt_updated_at
+      {{ audit_timestamp_utc() }} AS dbt_updated_at
 FROM environmental_metrics

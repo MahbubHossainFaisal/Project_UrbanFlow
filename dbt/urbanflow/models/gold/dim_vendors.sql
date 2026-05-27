@@ -6,5 +6,5 @@ WITH base AS(
 SELECT
     CAST(vendor_id AS INT) AS vendor_id,
     vendor_name,
-    CURRENT_TIMESTAMP() AS dbt_updated_at
+    {{ audit_timestamp_utc() }} AS dbt_updated_at
 FROM base

@@ -51,5 +51,5 @@ SELECT *,
     CASE WHEN rate_code_id=2 AND abs(fare_variance) > 0.5 THEN TRUE
         ELSE FALSE
     END AS is_price_anomaly,
-    CURRENT_TIMESTAMP() AS dbt_updated_at
+    {{ audit_timestamp_utc() }} AS dbt_updated_at
 FROM financial_integrity

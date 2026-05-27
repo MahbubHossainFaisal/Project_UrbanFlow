@@ -155,8 +155,10 @@ erDiagram
 - [x] **Airflow Runtime Validation**: Verified Postgres health, Airflow init, webserver, scheduler, UI login, and metadata DB connectivity.
 - [x] **Airflow Smoke DAG**: Created and successfully ran `urbanflow_smoke_test` to prove DAG discovery and task execution.
 - [x] **dbt Runtime Readiness**: Confirmed `dbt debug` passes inside the Airflow scheduler container and connects to Snowflake.
-- [ ] **Automated DAGs**: Defining the "Workflow as Code" to schedule the 5.5M+ record pipeline.
-- [ ] **dbt Smoke DAG**: Next orchestration proof: `dbt_debug -> dbt_ls` from Airflow.
+- [x] **dbt Smoke DAG**: Validated `dbt_debug -> dbt_ls` from Airflow.
+- [x] **Airflow-Orchestrated dbt Pipeline**: Built and successfully ran `start -> dbt_debug -> dbt_seed -> dbt_run_silver -> dbt_run_gold -> dbt_test -> end`.
+- [x] **Operational Guardrails**: Validated duplicate-load risk, fixed Airflow log secret-key handling, and standardized dbt Snowflake session timezone to UTC.
+- [ ] **Production DAG Hardening**: Add retries, task timeouts, and a production schedule when ready.
 - [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
 
 ---
@@ -172,6 +174,8 @@ erDiagram
 *   `docker compose down` - Safely stops and removes containers.
 *   **Airflow UI**: `http://localhost:8080` (Default: admin/admin)
 *   `docker compose exec airflow-scheduler bash -lc "cd /opt/airflow/dbt/urbanflow && dbt debug"` - Validates dbt from inside the Airflow runtime.
+*   `urbanflow_dbt_smoke_test` - Airflow DAG proving `dbt_debug -> dbt_ls`.
+*   `urbanflow_dbt_pipeline` - Airflow DAG running `dbt_debug -> dbt_seed -> dbt_run_silver -> dbt_run_gold -> dbt_test`.
 
 ### 3. dbt Elite Commands
 *   `uv run dbt build` - Executes Seeds, Models, and Tests in a single "Verification Loop."

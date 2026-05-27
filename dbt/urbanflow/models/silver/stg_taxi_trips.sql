@@ -56,7 +56,7 @@ enriched AS (
     EXTRACT(HOUR FROM pickup_datetime) AS pickup_hour,
     DAYOFWEEK(pickup_datetime) AS pickup_day_of_week,
     DATE_TRUNC('hour', pickup_datetime) AS pickup_hour_truncated,
-    CURRENT_TIMESTAMP() as dbt_updated_at
+    {{ audit_timestamp_utc() }} as dbt_updated_at
     FROM filtered
 ),
 

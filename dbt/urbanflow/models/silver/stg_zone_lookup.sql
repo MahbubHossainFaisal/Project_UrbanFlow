@@ -13,7 +13,7 @@ renamed AS (
     COALESCE(service_zone,'Unknown') as service_zone,
     SOURCE_URL as source_file,
     LOADED_AT as loaded_at_bronze,
-    CURRENT_TIMESTAMP() as dbt_updated_at
+    {{ audit_timestamp_utc() }} as dbt_updated_at
     FROM source
 )
 

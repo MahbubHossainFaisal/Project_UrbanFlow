@@ -11,3 +11,5 @@ urbanflow:
       database: "URBANFLOW_DB"
       schema: "BRONZE"
       threads: 1
+      session_parameters:
+        TIMEZONE: UTC

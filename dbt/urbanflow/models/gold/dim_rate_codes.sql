@@ -6,5 +6,5 @@ WITH base AS(
 SELECT
     CAST(rate_code_id AS INT) AS rate_code_id,
     rate_code_name,
-    CURRENT_TIMESTAMP() AS dbt_updated_at
+    {{ audit_timestamp_utc() }} AS dbt_updated_at
 FROM base

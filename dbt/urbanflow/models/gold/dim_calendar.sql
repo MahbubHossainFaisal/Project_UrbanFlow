@@ -45,5 +45,5 @@ business_logic AS(
 
 SELECT *,
     CASE WHEN holiday_name IS NOT NULL THEN TRUE ELSE FALSE END AS is_holiday,
-    CURRENT_TIMESTAMP() AS dbt_updated_at
+    {{ audit_timestamp_utc() }} AS dbt_updated_at
 FROM business_logic

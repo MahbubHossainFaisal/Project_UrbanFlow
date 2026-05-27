@@ -40,5 +40,5 @@ joined AS (
 )
 
 SELECT *,
-CURRENT_TIMESTAMP() AS last_updated_at
+{{ audit_timestamp_utc() }} AS last_updated_at
 FROM joined

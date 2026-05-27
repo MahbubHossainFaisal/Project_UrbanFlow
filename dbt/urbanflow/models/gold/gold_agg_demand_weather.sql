@@ -38,5 +38,5 @@ final_agg AS(
 )
 
 SELECT *,
-CURRENT_TIMESTAMP() AS last_aggregated_at
+{{ audit_timestamp_utc() }} AS last_aggregated_at
 FROM final_agg
