@@ -1,4 +1,5 @@
 import os
+import argparse
 import requests
 import pandas as pd
 import pyarrow.parquet as pq
@@ -7,6 +8,7 @@ import logging
 import time
 from scripts.data_ingestion.core.base_ingestor import BaseIngestor
 from scripts.data_ingestion.core.config import settings
+from scripts.data_ingestion.core.database import SnowflakeClient
 import sys
 
 
@@ -15,6 +17,34 @@ logging.basicConfig(
       level=logging.INFO,format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
           )
 logger = logging.getLogger(__name__)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Ingest NYC TLC yellow taxi parquet data.")
+    parser.add_argument(
+        "--year",
+        default="2023",
+        help="Four-digit taxi source year, for example 2023.",
+    )
+    parser.add_argument(
+        "--month",
+        default="02",
+        help="One- or two-digit taxi source month, for example 2 or 02.",
+    )
+    return parser.parse_args()
+
+
+def normalize_year_month(year, month):
+    year = str(year)
+    month = str(month).zfill(2)
+
+    if not year.isdigit() or len(year) != 4:
+        raise ValueError(f"Invalid taxi year: {year}")
+
+    if not month.isdigit() or not 1 <= int(month) <= 12:
+        raise ValueError(f"Invalid taxi month: {month}")
+
+    return year, month
 
 class TaxiIngestor(BaseIngestor):
 
@@ -42,6 +72,7 @@ class TaxiIngestor(BaseIngestor):
 
     def __init__(self, year, month):
         super().__init__(table_name="RAW_TAXI_TRIPS", overwrite=False)
+        year, month = normalize_year_month(year, month)
         self.year = year
         self.month = month
         self.file_name = f"yellow_tripdata_{year}-{month}.parquet"
@@ -102,6 +133,36 @@ class TaxiIngestor(BaseIngestor):
 
         return batch_df
 
+    def get_existing_source_file_rows(self) -> int:
+        """Return existing raw rows for this source file to avoid duplicate appends."""
+        with SnowflakeClient() as db:
+            return db.count_rows_by_value(
+                table_name=self.table_name,
+                column_name="SOURCE_FILE",
+                value=self.file_name,
+            )
+
+    def should_load_source_file(self, expected_rows: int) -> bool:
+        """Return False for fully loaded files and fail on partial loads."""
+        existing_rows = self.get_existing_source_file_rows()
+
+        if existing_rows == 0:
+            logger.info(f"No existing rows found for {self.file_name}. Continuing ingestion.")
+            return True
+
+        if existing_rows == expected_rows:
+            logger.info(
+                f"{self.file_name} is already loaded with {existing_rows} rows. "
+                "Skipping taxi ingestion to prevent duplicate raw data."
+            )
+            return False
+
+        raise RuntimeError(
+            f"Found {existing_rows} existing rows for {self.file_name}, "
+            f"but the source file contains {expected_rows} rows. "
+            "Refusing to append because the raw table may contain a partial load."
+        )
+
     
     def run(self):
         """ Overwrite run to handle batch processing """
@@ -109,6 +170,11 @@ class TaxiIngestor(BaseIngestor):
             path = self.extract()
             logger.info(f"Reading {path}...")
             parquet_file = pq.ParquetFile(path)
+            expected_rows = parquet_file.metadata.num_rows
+
+            if not self.should_load_source_file(expected_rows):
+                return
+
             total_rows = 0
             batch_size = 500000 # Process 500k rows at a time
             for batch in parquet_file.iter_batches(batch_size=batch_size):
@@ -129,8 +195,10 @@ class TaxiIngestor(BaseIngestor):
             logger.info(f"All batches loaded successfully to {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.RAW_TAXI_TRIPS. Total rows: {total_rows}")
         except Exception as e:
             logger.exception(f"Snowflake operation failed!")
+            raise
         
 
 if __name__ == '__main__':
-    ingestor = TaxiIngestor(year="2023", month="02")
+    args = parse_args()
+    ingestor = TaxiIngestor(year=args.year, month=args.month)
     ingestor.run()

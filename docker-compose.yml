@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   # Postgres Database
   postgres:
@@ -37,7 +36,7 @@ services:
       - ./scripts:/opt/airflow/scripts
       - ./dbt:/opt/airflow/dbt
 
-  # Airflow Scheduler (The Engine)
+  # Airflow Scheduler
   airflow-scheduler:
     build: .
     command: scheduler

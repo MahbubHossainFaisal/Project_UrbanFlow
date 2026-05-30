@@ -10,12 +10,15 @@ This file is the Codex-side working memory for the `Project_UrbanFlow` repositor
 - Warehouse: Snowflake
 - Transformations: dbt
 - Orchestration: Dockerized Airflow
-- Visual layer target: Streamlit dashboard
+- Visual layer: Streamlit executive dashboard
+- Delivery status: Portfolio-grade MVP complete
 
 ## Latest Known Status
 Source of truth used for this summary:
 - [2026-05-26_Session_23.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-26_Session_23.md)
 - [2026-05-27_Session_24.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-27_Session_24.md)
+- [2026-05-30_Session_25.md](D:/Project_UrbanFlow/session_docs/session_logs/2026-05-30_Session_25.md)
+- [PROJECT_COMPLETION_SUMMARY.md](D:/Project_UrbanFlow/session_docs/PROJECT_COMPLETION_SUMMARY.md)
 
 ### Completed
 - Modular OOP ingestion framework is complete.
@@ -61,20 +64,70 @@ Source of truth used for this summary:
 - Airflow UI task log 403 risk was fixed by pinning `AIRFLOW__WEBSERVER__SECRET_KEY` across Airflow services.
 - dbt Snowflake sessions now set `TIMEZONE: UTC` in `profiles.yml` for stable audit timestamp behavior.
 - Orchestration learning note added: `Learnings/Orchestration/03_Airflow_dbt_Pipeline_and_Operational_Guardrails.md`.
+- `urbanflow_dbt_pipeline` hardening added:
+  - one retry per task
+  - 5-minute retry delay
+  - task-specific execution timeouts
+  - `max_active_runs=1`
+- Obsolete top-level `version` key removed from `docker-compose.yml`.
+- `urbanflow_ingestion_pipeline` DAG added with:
+  - `start`
+  - `ingest_zone_lookup`
+  - `ingest_weather`
+  - `ingest_taxi`
+  - `trigger_dbt_pipeline`
+  - `end`
+- `urbanflow_ingestion_pipeline` uses `TriggerDagRunOperator` to trigger `urbanflow_dbt_pipeline` only after ingestion succeeds.
+- `ingestion_taxi_class.py` now re-raises exceptions so Airflow correctly fails the task if taxi ingestion fails.
+- Taxi raw ingestion idempotency is now guarded:
+  - `SnowflakeClient.count_rows_by_value()` checks existing rows by `SOURCE_FILE`
+  - `TaxiIngestor.should_load_source_file()` skips fully loaded source files
+  - partial source-file loads raise an error instead of appending more rows
+  - validated against Snowflake for `yellow_tripdata_2023-02.parquet`: existing row count `2,913,955`; guard returned `False`
+- Taxi ingestion source period is parameterized:
+  - `ingestion_taxi_class.py` supports `--year` and `--month`
+  - month values are normalized to two digits
+  - invalid years/months raise validation errors
+  - `urbanflow_ingestion_pipeline` exposes `taxi_year` and `taxi_month` params
+  - automatic scheduled command uses the Airflow `logical_date` year/month
+  - rendered example for `2026-06-15`: `python -m scripts.data_ingestion.ingestion_taxi_class --year 2026 --month 06`
+- Production schedule applied:
+  - `urbanflow_ingestion_pipeline` schedule is `0 6 15 * *`
+  - the ingestion DAG is unpaused
+  - `urbanflow_dbt_pipeline` remains `schedule=None` and is triggered by the ingestion DAG
+- Streamlit executive dashboard foundation added:
+  - file: `streamlit_app.py`
+  - dependency: `streamlit`
+  - command: `uv run streamlit run streamlit_app.py`
+  - local URL: `http://localhost:8501`
+  - Snowflake-backed overview KPIs: trips, revenue, average fare, CO2, price anomalies, distance, duration, precipitation share, and short-efficiency-risk trips
+  - overview visuals: demand by borough, hourly demand, weather demand mix, airport fare watchlist
+  - default date bounds use meaningful daily trip volume to avoid stray historical timestamp outliers
+- Project close-out docs added:
+  - `session_docs/PROJECT_COMPLETION_SUMMARY.md`
+  - `session_docs/session_logs/2026-05-30_Session_25.md`
+- Final portfolio presentation package added:
+  - `session_docs/final_presentation/README.md`
+  - `session_docs/final_presentation/PROJECT_ONE_PAGER.md`
+  - `session_docs/final_presentation/PRESENTATION_OUTLINE.md`
+  - `session_docs/final_presentation/ARCHITECTURE_WALKTHROUGH.md`
+  - `session_docs/final_presentation/DEMO_SCRIPT.md`
+- New ingestion DAG validation passed:
+  - `airflow dags list-import-errors`: no data found
+  - `airflow tasks list urbanflow_ingestion_pipeline --tree`: expected task chain
+  - container `py_compile` check passed for the ingestion DAG and ingestion scripts
 
 ### Current Focus
 - Phase 5: Orchestration & Visual Intelligence
-- Sprint 5.2 orchestration foundation is complete.
-- Next focus: Sprint 5.3 Streamlit executive dashboard.
+- Portfolio-grade MVP is complete.
+- Final portfolio presentation package is prepared.
+- Next focus is optional dashboard expansion and publishing hygiene.
 
 ### Next Concrete Tasks
-- Start Sprint 5.3 Streamlit dashboard planning.
-- Define dashboard audience, core KPIs, and first page layout.
-- Build Snowflake-backed Streamlit views for demand, financial integrity, and sustainability.
-- Keep orchestration hardening for later:
-  - add retries and task timeouts
-  - add a production schedule
-  - remove obsolete `version` from `docker-compose.yml`
+- Optionally expand the Streamlit dashboard beyond the executive overview.
+- Optionally add dedicated demand/weather, financial integrity, sustainability, and pipeline health views.
+- Move secrets to a safer sharing/deployment pattern before publishing externally.
+- Monitor the first scheduled ingestion run and adjust source-period timing if TLC source availability requires a delay.
 
 ## Working Mandates
 

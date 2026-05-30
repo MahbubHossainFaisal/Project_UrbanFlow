@@ -256,6 +256,26 @@ The stack must be restarted for this setting to take effect.
 
 ---
 
+## DAG Runtime Hardening
+After the main pipeline succeeded, the DAG was hardened with basic operational controls:
+
+```text
+retries=1
+retry_delay=5 minutes
+max_active_runs=1
+task-specific execution_timeout values
+```
+
+The purpose of retries is to absorb short-lived infrastructure issues, not to hide deterministic model failures.
+
+The purpose of execution timeouts is to prevent a stuck dbt process from occupying the Airflow worker indefinitely.
+
+`max_active_runs=1` prevents overlapping pipeline runs. This matters because overlapping dbt runs can compete for Snowflake resources and create confusing audit timestamps or lock behavior.
+
+The Docker Compose file was also cleaned by removing the obsolete top-level `version` key.
+
+---
+
 ## Final Validated State
 The following DAGs now exist:
 
@@ -289,12 +309,10 @@ The Dockerized orchestration foundation is complete.
 ---
 
 ## Deferred Hardening
-The following items are intentionally deferred:
+The following item is intentionally deferred:
 
 ```text
-Add retries and task timeouts.
 Add a production schedule.
-Remove the obsolete docker-compose.yml version key.
 ```
 
-These are hardening tasks. They are not blockers for the current orchestration foundation milestone.
+The schedule should be chosen based on upstream data freshness and Snowflake cost. Until that cadence is clear, the dbt pipeline can remain manually triggered.

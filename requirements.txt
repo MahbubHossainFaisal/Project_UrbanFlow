@@ -4,3 +4,4 @@ pyarrow
 requests
 python-dotenv
 dbt-snowflake
+streamlit

@@ -1,5 +1,22 @@
 # UrbanFlow Analytics: Full-Stack Urban Intelligence Platform
 
+## Project Status
+UrbanFlow is complete as a portfolio-grade, end-to-end data platform MVP.
+
+The delivered platform covers:
+
+```text
+External sources
+  -> Python ingestion
+  -> Snowflake bronze
+  -> dbt silver/gold
+  -> Airflow orchestration
+  -> Streamlit executive dashboard
+```
+
+See [`session_docs/PROJECT_COMPLETION_SUMMARY.md`](session_docs/PROJECT_COMPLETION_SUMMARY.md) for the close-out summary.
+Use [`session_docs/final_presentation/README.md`](session_docs/final_presentation/README.md) for the final portfolio presentation package.
+
 ## 🏙️ Project Overview
 UrbanFlow Analytics is an end-to-end, production-grade data intelligence platform built for the **NYC Taxi & Limousine Commission (TLC)**. Moving beyond simple orchestration, this platform is a **Full-Stack Data Factory** designed to provide deep insights into urban mobility, financial integrity, and environmental sustainability.
 
@@ -150,7 +167,9 @@ erDiagram
 - [x] **Legacy Migration**: Refactored all functional scripts into the Modular Framework (Zone, Weather, & Taxi).
 - [x] **The Verification Loop**: Hardened the dbt-layer unique keys and corrected timestamp drift (The "Epoch Trap") across the 5.5M+ record dataset.
 
-### Phase 5: Orchestration & Visual Intelligence - 🔄 In Progress
+### Phase 5: Orchestration & Visual Intelligence - Complete MVP
+**Status**: Complete MVP.
+
 - [x] **Dockerized Foundation**: Containerized the entire stack (Airflow, Postgres, dbt) with volume mounting for real-time development.
 - [x] **Airflow Runtime Validation**: Verified Postgres health, Airflow init, webserver, scheduler, UI login, and metadata DB connectivity.
 - [x] **Airflow Smoke DAG**: Created and successfully ran `urbanflow_smoke_test` to prove DAG discovery and task execution.
@@ -158,8 +177,17 @@ erDiagram
 - [x] **dbt Smoke DAG**: Validated `dbt_debug -> dbt_ls` from Airflow.
 - [x] **Airflow-Orchestrated dbt Pipeline**: Built and successfully ran `start -> dbt_debug -> dbt_seed -> dbt_run_silver -> dbt_run_gold -> dbt_test -> end`.
 - [x] **Operational Guardrails**: Validated duplicate-load risk, fixed Airflow log secret-key handling, and standardized dbt Snowflake session timezone to UTC.
-- [ ] **Production DAG Hardening**: Add retries, task timeouts, and a production schedule when ready.
-- [ ] **Streamlit Executive Dashboard**: Interactive KPI reporting for TLC leadership.
+- [x] **DAG Runtime Hardening**: Added retries, task execution timeouts, `max_active_runs=1`, and removed the obsolete Docker Compose `version` key.
+- [x] **Two-DAG Orchestration Design**: Added `urbanflow_ingestion_pipeline` to run bronze ingestion and trigger `urbanflow_dbt_pipeline` only after ingestion succeeds.
+- [x] **Taxi Raw Idempotency Guard**: Added `SOURCE_FILE` row-count checks so already-loaded taxi parquet files are skipped instead of appended again.
+- [x] **Parameterized Taxi Ingestion**: Added `taxi_year` and `taxi_month` Airflow params and CLI arguments for source-period selection.
+- [x] **Production Schedule**: Scheduled `urbanflow_ingestion_pipeline` monthly on the 15th at 06:00 UTC; dbt remains trigger-only.
+- [x] **Streamlit Executive Dashboard Foundation**: Added Snowflake-backed executive overview with demand, revenue, finance, sustainability, weather, and borough KPIs.
+
+### Optional Future Polish
+- [ ] **Dashboard Expansion**: Add dedicated demand/weather, financial integrity, sustainability, and pipeline health views.
+- [x] **Presentation Package**: Final portfolio walkthrough, architecture narrative, and demo script are available in [`session_docs/final_presentation/`](session_docs/final_presentation/).
+- [ ] **Secret Hygiene**: Move local credentials to a safer sharing/deployment pattern before publishing.
 
 ---
 
@@ -176,10 +204,18 @@ erDiagram
 *   `docker compose exec airflow-scheduler bash -lc "cd /opt/airflow/dbt/urbanflow && dbt debug"` - Validates dbt from inside the Airflow runtime.
 *   `urbanflow_dbt_smoke_test` - Airflow DAG proving `dbt_debug -> dbt_ls`.
 *   `urbanflow_dbt_pipeline` - Airflow DAG running `dbt_debug -> dbt_seed -> dbt_run_silver -> dbt_run_gold -> dbt_test`.
+*   `urbanflow_ingestion_pipeline` - Airflow DAG running bronze ingestion, then triggering `urbanflow_dbt_pipeline`.
+    *   Manual trigger params: `taxi_year` and `taxi_month`.
+    *   Production cadence: `0 6 15 * *`.
 
 ### 3. dbt Elite Commands
 *   `uv run dbt build` - Executes Seeds, Models, and Tests in a single "Verification Loop."
 *   `uv run dbt build --full-refresh` - Purges and rebuilds the Medallion layers.
+
+### 4. Streamlit Dashboard
+*   `uv sync` - Installs the dashboard dependency set, including Streamlit.
+*   `uv run streamlit run streamlit_app.py` - Starts the UrbanFlow executive dashboard.
+*   **Dashboard URL**: `http://localhost:8501`
 
 ### 📚 Learning Resources
 Detailed architectural deep-dives are documented in the following repository:
@@ -187,3 +223,4 @@ Detailed architectural deep-dives are documented in the following repository:
 *   [`Learnings/dbt/`](Learnings/dbt/) - dbt configuration intuition and design patterns.
 *   [`Learnings/Orchestration/`](Learnings/Orchestration/) - Dockerized Airflow setup, DAG basics, and dbt orchestration readiness.
 *   [`Learnings/Snowflake/`](Learnings/Snowflake/) - RBAC and performance optimization patterns.
+*   [`Learnings/Streamlit/`](Learnings/Streamlit/) - Visual intelligence and dashboard implementation notes.
