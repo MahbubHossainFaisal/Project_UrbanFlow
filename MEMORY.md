@@ -118,16 +118,17 @@ Source of truth used for this summary:
   - container `py_compile` check passed for the ingestion DAG and ingestion scripts
 
 ### Current Focus
-- Phase 5: Orchestration & Visual Intelligence
+- Project mastery phase.
 - Portfolio-grade MVP is complete.
 - Final portfolio presentation package is prepared.
-- Next focus is optional dashboard expansion and publishing hygiene.
+- The current goal is to understand the project deeply enough to explain the architecture, code, data relationships, operational decisions, and tradeoffs without relying on new implementation work.
 
 ### Next Concrete Tasks
-- Optionally expand the Streamlit dashboard beyond the executive overview.
-- Optionally add dedicated demand/weather, financial integrity, sustainability, and pipeline health views.
-- Move secrets to a safer sharing/deployment pattern before publishing externally.
-- Monitor the first scheduled ingestion run and adjust source-period timing if TLC source availability requires a delay.
+- Learn the project from first principles, layer by layer.
+- Review each major concept, file, relationship, and execution path.
+- Practice explaining the system through interview-style and architecture-review questions.
+- Build confidence through oral/written reconstruction rather than adding new code.
+- Defer new feature work unless the user explicitly asks to resume implementation.
 
 ## Working Mandates
 
@@ -137,6 +138,10 @@ Source of truth used for this summary:
 - Optimize for production-grade design, clarity, and user growth.
 - Use guided discovery where possible, but provide direct implementation when explicitly requested.
 - Explain the architectural "why", not just the syntax.
+- During the project mastery phase, default to teaching and questioning instead of coding.
+- Help the user learn every concept, code path, model relationship, and operational decision until they can defend the project independently.
+- Prefer first-principles explanations, diagrams, mental models, and interview-style practice.
+- If the user asks for an answer, give the answer, then ask one strong follow-up question to test understanding.
 
 ### Core Engineering Rules
 - Always think architecture-first before implementation.

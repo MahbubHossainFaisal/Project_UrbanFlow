@@ -184,11 +184,6 @@ erDiagram
 - [x] **Production Schedule**: Scheduled `urbanflow_ingestion_pipeline` monthly on the 15th at 06:00 UTC; dbt remains trigger-only.
 - [x] **Streamlit Executive Dashboard Foundation**: Added Snowflake-backed executive overview with demand, revenue, finance, sustainability, weather, and borough KPIs.
 
-### Optional Future Polish
-- [ ] **Dashboard Expansion**: Add dedicated demand/weather, financial integrity, sustainability, and pipeline health views.
-- [x] **Presentation Package**: Final portfolio walkthrough, architecture narrative, and demo script are available in [`session_docs/final_presentation/`](session_docs/final_presentation/).
-- [ ] **Secret Hygiene**: Move local credentials to a safer sharing/deployment pattern before publishing.
-
 ---
 
 ## ⚙️ Project Setup & Commands Used
